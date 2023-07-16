@@ -1,3 +1,4 @@
+using AutoLegalTracker_API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoLegalTracker_API.Controllers

@@ -1,7 +1,8 @@
-namespace AutoLegalTracker_API
+namespace AutoLegalTracker_API.Models
 {
     public class WeatherForecast
     {
+        public int Id { get; set; }
         public DateTime Date { get; set; }
 
         public int TemperatureC { get; set; }
