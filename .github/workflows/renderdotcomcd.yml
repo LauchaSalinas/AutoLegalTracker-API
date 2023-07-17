@@ -1,0 +1,19 @@
+name: Deploy to Render.com
+
+on:
+  push:
+    branches:
+      - production
+      - staging
+      
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Render Deploy Action
+      uses: johnbeynon/render-deploy-action@v0.0.8
+      with:
+        service-id: ${{ github.ref == 'refs/heads/staging' && secrets.RENDER_SERVICE_ID_STAGING || secrets.RENDER_SERVICE_ID_PRODUCTION }}
+        api-key: ${{ secrets.RENDER_API_KEY }}
