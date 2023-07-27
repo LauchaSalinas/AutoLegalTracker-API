@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Mac OS X folder attributes
+.DS_Store
+
+# launchSettings.json
+AutoLegalTracker-API/Properties/launchSettings.json
