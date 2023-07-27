@@ -365,5 +365,12 @@ FodyWeavers.xsd
 # Mac OS X folder attributes
 .DS_Store
 
+# Properties
+AutoLegalTracker-API/Properties/
+AutoLegalTracker-API.Tests/Properties/
+
 # launchSettings.json
 AutoLegalTracker-API/Properties/launchSettings.json
+
+# vsc
+.vscode/
