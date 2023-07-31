@@ -41,5 +41,25 @@ namespace AutoLegalTracker_API.Controllers
             _context.SaveChanges();
 
         }
+
+        [Authorize]
+        [HttpDelete("{id}", Name = "DeleteWeatherForecast")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                var weatherForecast = _weatherForecastService.DeleteWeatherForecast(id);
+                if (weatherForecast == null)
+                    return NotFound();
+
+                return Ok(weatherForecast);
+            }
+            catch (AppDataAccessException ex)
+            {
+                // Log the exception or handle it accordingly.
+                // Return an appropriate error response to the client.
+                return BadRequest("An error occurred while deleting the weather forecast.");
+            }
+        }
     }
 }
