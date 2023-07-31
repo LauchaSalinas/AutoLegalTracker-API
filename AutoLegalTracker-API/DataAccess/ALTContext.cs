@@ -10,6 +10,5 @@ namespace AutoLegalTracker_API.DataAccess
 
         }
         public DbSet<WeatherForecast> WeatherForecasts { get; set;}
-        public DbSet<Jwt> Jwts { get; set; }
     }
 }

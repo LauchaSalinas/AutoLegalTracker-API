@@ -1,5 +1,6 @@
 using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoLegalTracker_API.Controllers
@@ -17,6 +18,7 @@ namespace AutoLegalTracker_API.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
