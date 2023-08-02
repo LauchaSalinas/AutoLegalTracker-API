@@ -1,5 +1,7 @@
 using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Models;
+using AutoLegalTracker_API.Business;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +13,13 @@ namespace AutoLegalTracker_API.Controllers
     {
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly ALTContext _context;
+        private readonly WeatherForecastBLL _weatherForecastBLL;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL)
         {
             _logger = logger;
             _context = context;
+            _weatherForecastBLL = weatherForecastBLL;
         }
 
         [Authorize]
@@ -48,16 +52,18 @@ namespace AutoLegalTracker_API.Controllers
         {
             try
             {
-                var weatherForecast = _weatherForecastService.DeleteWeatherForecast(id);
+                // TODO add Delete Method
+                var weatherForecast = _weatherForecastBLL.DeleteWeatherForecast(id);
                 if (weatherForecast == null)
                     return NotFound();
 
                 return Ok(weatherForecast);
             }
-            catch (AppDataAccessException ex)
+            catch (ApplicationException ex)
             {
-                // Log the exception or handle it accordingly.
-                // Return an appropriate error response to the client.
+                // Log the exception
+                _logger.LogError(ex, "An error occurred while deleting the weather forecast.");
+                // Return a custom application error
                 return BadRequest("An error occurred while deleting the weather forecast.");
             }
         }

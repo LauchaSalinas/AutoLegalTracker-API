@@ -19,6 +19,9 @@ namespace AutoLegalTracker_API
             // Add dependency injection to the Business Logic Layer
             builder.Services.AddTransient<JwtBusiness>();
             builder.Services.AddTransient<UserBusiness>();
+            builder.Services.AddTransient<WeatherForecastBLL>();
+            // TODO Add dependency injection to the Data Access Layer
+            builder.Services.AddTransient<WeatherForecastDAL>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
