@@ -12,26 +12,23 @@ namespace AutoLegalTracker_API.Controllers
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
-        private readonly ALTContext _context;
         private readonly WeatherForecastBLL _weatherForecastBLL;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, WeatherForecastBLL weatherForecastBLL)
         {
             _logger = logger;
-            _context = context;
             _weatherForecastBLL = weatherForecastBLL;
         }
 
-        [Authorize]
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IEnumerable<WeatherForecast>> Get()
         {
             // return all the weather forecasts
-            return _context.WeatherForecasts;
+            return await _weatherForecastBLL.GetAllWeatherForecasts();
         }
 
         [HttpPost]
-        public void Post(int year, int month, int day, int temperature, string summary)
+        public async Task Post(int year, int month, int day, int temperature, string summary)
         {
             // instantiate a new weatherforecast object
             WeatherForecast weatherForecast = new WeatherForecast();
@@ -40,9 +37,7 @@ namespace AutoLegalTracker_API.Controllers
             weatherForecast.TemperatureC = temperature;
             weatherForecast.Summary = summary;
             // add the object to the database
-            _context.WeatherForecasts.Add(weatherForecast);
-            // save the changes
-            _context.SaveChanges();
+            await _weatherForecastBLL.CreateWeatherForecast(weatherForecast);
 
         }
 
@@ -52,7 +47,6 @@ namespace AutoLegalTracker_API.Controllers
         {
             try
             {
-                // TODO add Delete Method
                 var weatherForecast = _weatherForecastBLL.DeleteWeatherForecast(id);
                 if (weatherForecast == null)
                     return NotFound();

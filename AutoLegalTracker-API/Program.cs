@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 using AutoLegalTracker_API.Business;
+using AutoLegalTracker_API.Models;
 
 namespace AutoLegalTracker_API
 {
@@ -21,7 +22,7 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<UserBusiness>();
             builder.Services.AddTransient<WeatherForecastBLL>();
             // TODO Add dependency injection to the Data Access Layer
-            builder.Services.AddTransient<WeatherForecastDAL>();
+            builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
