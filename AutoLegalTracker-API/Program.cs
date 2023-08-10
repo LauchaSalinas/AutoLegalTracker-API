@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 using AutoLegalTracker_API.Business;
+using AutoLegalTracker_API.Services;
+using Quartz.Impl;
 
 namespace AutoLegalTracker_API
 {
@@ -19,9 +21,19 @@ namespace AutoLegalTracker_API
             // Add dependency injection to the Business Logic Layer
             builder.Services.AddTransient<JwtBusiness>();
             builder.Services.AddTransient<UserBusiness>();
-            builder.Services.AddTransient<WeatherForecastBLL>();
+            //builder.Services.AddTransient<WeatherForecastBLL>();
             // TODO Add dependency injection to the Data Access Layer
-            builder.Services.AddTransient<WeatherForecastDAL>();
+            //builder.Services.AddTransient<WeatherForecastDAL>();
+
+            builder.Services.AddSingleton(provider =>
+            {
+                var schedulerFactory = new StdSchedulerFactory();
+                return schedulerFactory.GetScheduler().Result;
+            });
+
+            // Add Quartz scheduler service
+            builder.Services.AddSingleton<CronService>();
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -79,6 +91,10 @@ namespace AutoLegalTracker_API
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
 
                 Context.Database.Migrate();
+
+                // Start Quartz scheduler
+                var quartzService = scope.ServiceProvider.GetRequiredService<CronService>();
+                quartzService.StartAsync().Wait();
             }
 
 
