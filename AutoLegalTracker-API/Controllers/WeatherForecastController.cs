@@ -46,26 +46,26 @@ namespace AutoLegalTracker_API.Controllers
 
         }
 
-        [Authorize]
-        [HttpDelete("{id}", Name = "DeleteWeatherForecast")]
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                // TODO add Delete Method
-                var weatherForecast = _weatherForecastBLL.DeleteWeatherForecast(id);
-                if (weatherForecast == null)
-                    return NotFound();
+        //[Authorize]
+        //[HttpDelete("{id}", Name = "DeleteWeatherForecast")]
+        //public IActionResult Delete(int id)
+        //{
+        //    try
+        //    {
+        //        // TODO add Delete Method
+        //        var weatherForecast = _weatherForecastBLL.DeleteWeatherForecast(id);
+        //        if (weatherForecast == null)
+        //            return NotFound();
 
-                return Ok(weatherForecast);
-            }
-            catch (ApplicationException ex)
-            {
-                // Log the exception
-                _logger.LogError(ex, "An error occurred while deleting the weather forecast.");
-                // Return a custom application error
-                return BadRequest("An error occurred while deleting the weather forecast.");
-            }
-        }
+        //        return Ok(weatherForecast);
+        //    }
+        //    catch (ApplicationException ex)
+        //    {
+        //        // Log the exception
+        //        _logger.LogError(ex, "An error occurred while deleting the weather forecast.");
+        //        // Return a custom application error
+        //        return BadRequest("An error occurred while deleting the weather forecast.");
+        //    }
+        //}
     }
 }
