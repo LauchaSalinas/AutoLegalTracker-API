@@ -1,13 +1,13 @@
 ﻿using System;
 namespace AutoLegalTracker_API.DataAccess
 {
-	public interface IDataAccesss<T>
+	public interface IDataAccesssAsync<T> : IDisposable where T : class
     {
-        T Create(T entity);
-        T Update(T entity);
-        T GetById(int id);
-        IEnumerable<T> GetAll();
-        T Delete(int id);
+        Task<IEnumerable<T>> GetAll();
+        Task<T> GetById(int id);
+        Task<T> Insert(T entity);
+        Task<T> Delete(int id);
+        Task Update(T entity);
     }
 }
 

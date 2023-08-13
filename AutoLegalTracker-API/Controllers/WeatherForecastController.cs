@@ -13,17 +13,21 @@ namespace AutoLegalTracker_API.Controllers
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
-        private readonly ALTContext _context;
         private readonly WeatherForecastBLL _weatherForecastBLL;
         private readonly EmailService _email;
+
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL, EmailService mail)
         {
             _email = mail;
             _logger = logger;
-            _context = context;
             _weatherForecastBLL = weatherForecastBLL;
         }
+        //[HttpGet(Name = "GetWeatherForecast")]
+        //public async Task<IEnumerable<WeatherForecast>> Get()
+        //{
+            // return all the weather forecasts
+        //    return await _weatherForecastBLL.GetAllWeatherForecasts();
 
         //[Authorize]
         [HttpGet(Name = "GetWeatherForecast")]
@@ -32,7 +36,7 @@ namespace AutoLegalTracker_API.Controllers
             Email email = new Email();
             email.EmailCode = "EMAIL-CODE-PROTOTIPO-3";
             email.Subject = "SUBJECT-PROTOTIPO-3";
-            email.Body = "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500";
+            email.Body = "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estÃ¡ndar de las industrias desde el aÃ±o 1500";
 
             _context.Emails.Add(email);
             _context.SaveChanges();
@@ -63,7 +67,7 @@ namespace AutoLegalTracker_API.Controllers
         //    //email.EmailCode = "EMAIL-CODE-PROTOTIPO-2";
         //    //email.Subject = "SUBJECT-PROTOTIPO-2"; 
         //    //email.Body = "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el tex
-        //    //to de relleno estándar de las industrias desde el año 1500";
+        //    //to de relleno estÃ¡ndar de las industrias desde el aÃ±o 1500";
 
         //    //_context.Emails.Add(email);
         //    //_context.SaveChanges();
@@ -74,7 +78,7 @@ namespace AutoLegalTracker_API.Controllers
 
 
         [HttpPost]
-        public void Post(int year, int month, int day, int temperature, string summary)
+        public async Task Post(int year, int month, int day, int temperature, string summary)
         {
             // instantiate a new weatherforecast object
             WeatherForecast weatherForecast = new WeatherForecast();
@@ -86,6 +90,29 @@ namespace AutoLegalTracker_API.Controllers
 
 
             // add the object to the database
+            await _weatherForecastBLL.CreateWeatherForecast(weatherForecast);
+        }
+
+        [Authorize]
+        [HttpDelete("{id}", Name = "DeleteWeatherForecast")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                var weatherForecast = _weatherForecastBLL.DeleteWeatherForecast(id);
+                if (weatherForecast == null)
+                    return NotFound();
+
+                return Ok(weatherForecast);
+            }
+            catch (ApplicationException ex)
+            {
+                // Log the exception
+                _logger.LogError(ex, "An error occurred while deleting the weather forecast.");
+                // Return a custom application error
+                return BadRequest("An error occurred while deleting the weather forecast.");
+            }
+        }
             _context.WeatherForecasts.Add(weatherForecast);
             // save the changes 
             _context.SaveChanges();
@@ -113,6 +140,5 @@ namespace AutoLegalTracker_API.Controllers
             //        return BadRequest("An error occurred while deleting the weather forecast.");
             //    }
             //}
-        
     }
 }

@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 using AutoLegalTracker_API.Business;
+using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services; 
+
 
 namespace AutoLegalTracker_API
 {
@@ -24,6 +26,8 @@ namespace AutoLegalTracker_API
             // Add dependency injection to the Services Layer
             builder.Services.AddTransient<EmailService>();
             // TODO Add dependency injection to the Data Access Layer
+
+            builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddTransient<WeatherForecastDAL>();
             builder.Services.AddTransient<EmailDAL>();
             builder.Services.AddTransient<EmailLogDAL>();
