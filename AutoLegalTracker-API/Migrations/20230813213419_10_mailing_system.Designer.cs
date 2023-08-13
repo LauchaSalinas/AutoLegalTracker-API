@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLegalTracker_API.Migrations
 {
     [DbContext(typeof(ALTContext))]
-    [Migration("20230810190754_10_mailing_system")]
+    [Migration("20230813213419_10_mailing_system")]
     partial class _10_mailing_system
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

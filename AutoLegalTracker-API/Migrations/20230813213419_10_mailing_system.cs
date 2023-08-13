@@ -9,6 +9,21 @@ namespace AutoLegalTracker_API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Emails",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmailCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Emails", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmailLogs",
                 columns: table => new
                 {
@@ -39,6 +54,9 @@ namespace AutoLegalTracker_API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "EmailLogs");
+
+            migrationBuilder.DropTable(
+                name: "Emails");
         }
     }
 }
