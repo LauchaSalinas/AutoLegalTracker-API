@@ -4,6 +4,7 @@ using AutoLegalTracker_API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLegalTracker_API.Migrations
 {
     [DbContext(typeof(ALTContext))]
-    partial class ALTContextModelSnapshot : ModelSnapshot
+    [Migration("20230813225503_10_changes_to_email_models")]
+    partial class _10_changes_to_email_models
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
