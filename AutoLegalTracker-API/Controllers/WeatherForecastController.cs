@@ -14,10 +14,10 @@ namespace AutoLegalTracker_API.Controllers
     {
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly WeatherForecastBLL _weatherForecastBLL;
-        private readonly EmailService _email;
+        private readonly EmailBLL _email;
 
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL, EmailService mail)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL, EmailBLL mail)
         {
             _email = mail;
             _logger = logger;
@@ -26,38 +26,27 @@ namespace AutoLegalTracker_API.Controllers
         //[HttpGet(Name = "GetWeatherForecast")]
         //public async Task<IEnumerable<WeatherForecast>> Get()
         //{
-            // return all the weather forecasts
+        // return all the weather forecasts
         //    return await _weatherForecastBLL.GetAllWeatherForecasts();
 
         //[Authorize]
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<EmailLog> Get()
+        public async Task <IEnumerable<EmailLog>> Get()
         {
-            Email email = new Email();
-            email.EmailCode = "EMAIL-CODE-PROTOTIPO-3";
-            email.Subject = "SUBJECT-PROTOTIPO-3";
-            email.Body = "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500";
+            //Email email = new Email();
+            //email.emailCode = EmailCode.NewCase; 
+            //email.Subject = "SUBJECT-PROTOTIPO-1";
+            //email.Body = "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500";
 
-            _context.Emails.Add(email);
-            _context.SaveChanges();
+            //await _email.CreateEmail(email);
 
-            //TRYING SEND EMAIL ON GET
-            //var dataEmail = _email.sendEmail("This its a test", "gonzalez01juanm@gmail.com", "Lorem Ipsum");
+            //await _email.SendEmail(EmailCode.NewCase, "gonzalez01juanm@gmail.com");
 
-            EmailLog emailLog = new EmailLog();
-            emailLog.EmailDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-            emailLog.UserTo = "gonzalez01juanm@gmail.com";
-            emailLog.EmailId = 3;
+            var historicMails = await _email.GetAllHistoricEmails();
 
-            // Adding in the DB the emailLog created
-            _context.EmailLogs.Add(emailLog);
-            _context.SaveChanges();
-
-
-            //return emailLog; 
-            // return the log emails
-            return _context.EmailLogs;
+            return historicMails; 
         }
+        
         //public IEnumerable<WeatherForecast> Get()
         //{
         //    //TRYING SEND EMAIL ON GET
@@ -113,11 +102,7 @@ namespace AutoLegalTracker_API.Controllers
                 return BadRequest("An error occurred while deleting the weather forecast.");
             }
         }
-            _context.WeatherForecasts.Add(weatherForecast);
-            // save the changes 
-            _context.SaveChanges();
-
-        }
+            
 
             //[Authorize]
             //[HttpDelete("{id}", Name = "DeleteWeatherForecast")]

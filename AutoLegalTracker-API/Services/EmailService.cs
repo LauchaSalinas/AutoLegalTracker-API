@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using AutoLegalTracker_API.Models;
+using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Net.Http;
 using System.Net.Mail;
@@ -33,16 +34,16 @@ namespace AutoLegalTracker_API.Services
         #endregion Constructor
 
         #region Public Methods
-        public bool sendEmail(string subject, string userTo, string body)
+        public bool sendEmail(Email emailTemplate, string userTo)
         {
             try
             {
                 MailMessage mail = new MailMessage();
                 mail.From = new MailAddress(_userFrom, _userName);
                 mail.To.Add(userTo);
-                mail.Subject = subject;
+                mail.Subject = emailTemplate.Subject;
                 mail.IsBodyHtml = false;
-                mail.Body = body;
+                mail.Body = emailTemplate.Body;
 
                 _smtpClient.Send(mail);
 

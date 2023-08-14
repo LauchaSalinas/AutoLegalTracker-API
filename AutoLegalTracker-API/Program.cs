@@ -23,14 +23,13 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<JwtBusiness>();
             builder.Services.AddTransient<UserBusiness>();
             builder.Services.AddTransient<WeatherForecastBLL>();
+            builder.Services.AddTransient<EmailBLL>();
             // Add dependency injection to the Services Layer
             builder.Services.AddTransient<EmailService>();
             // TODO Add dependency injection to the Data Access Layer
-
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
-            builder.Services.AddTransient<WeatherForecastDAL>();
-            builder.Services.AddTransient<EmailDAL>();
-            builder.Services.AddTransient<EmailLogDAL>();
+            builder.Services.AddScoped<IDataAccesssAsync<Email>, DataAccessAsync<Email>>();
+            builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
