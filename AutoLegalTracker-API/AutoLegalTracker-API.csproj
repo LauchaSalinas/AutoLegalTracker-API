@@ -33,9 +33,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Services\" />
+    <None Remove="5_WebServices\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\" />
+    <Folder Include="5_WebServices\" />
   </ItemGroup>
 </Project>

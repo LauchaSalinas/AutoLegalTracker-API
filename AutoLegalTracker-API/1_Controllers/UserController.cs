@@ -44,6 +44,27 @@ namespace ALTDeployTest.Controllers
             return StatusCode(StatusCodes.Status400BadRequest);
         }
 
+        [HttpPost]
+        [Route("signup")]
+        public ActionResult SignUp()
+        {
+            return new JsonResult(new { key1 = "test"});
+        }
+
+        [HttpPost]
+        [Route("signout")]
+        public ActionResult SignOut()
+        {
+            return new JsonResult(new { key1 = "test" });
+        }
+
+        [HttpPost]
+        [Route("setscrappingcredentials")]
+        public ActionResult SetScrappingCredentials()
+        {
+            return new JsonResult(new { key1 = "test" });
+        }
+
         #endregion Public Methods
     }
 }
