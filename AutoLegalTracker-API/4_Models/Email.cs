@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoLegalTracker_API.Models
 {
-    public class Email
+    public class EmailTemplate
     {
         [Key]
         public int Id { get; set; }
 
-        public EmailCode emailCode { get; set; }
+        public EmailTemplateEnum emailCode { get; set; }
 
         public string Subject { get; set; }
         public string Body { get; set; }
@@ -24,15 +24,15 @@ namespace AutoLegalTracker_API.Models
         public string UserTo { get; set; }
         public DateTime EmailDate { get; set; }
         // Email Foreign Key
-        public int EmailId { get; set; }
+        public int EmailTemplateId { get; set; }
 
         // Creating an email object and indicating which property is the FK
         //TODO check why this is getting to the controller 
-        [ForeignKey("EmailId")]
-        public virtual Email Email { get; set; }
+        [ForeignKey("EmailTemplateId")]
+        public virtual EmailTemplate Email { get; set; }
     }
 
-    public enum EmailCode
+    public enum EmailTemplateEnum
     {
         NewUser,
         NewCase,

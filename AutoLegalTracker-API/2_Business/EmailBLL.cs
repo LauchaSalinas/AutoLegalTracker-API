@@ -7,18 +7,18 @@ namespace AutoLegalTracker_API.Business
 {
     public class EmailBLL
     {
-        private readonly IDataAccesssAsync<Email> _dataAccess;
+        private readonly IDataAccesssAsync<EmailTemplate> _dataAccess;
         private readonly IDataAccesssAsync<EmailLog> _dataAccessLog;
         private readonly EmailService _emailService;
 
-        public EmailBLL(IDataAccesssAsync<Email> dataAccess, IDataAccesssAsync<EmailLog> dataAccessLog, EmailService emailService)
+        public EmailBLL(IDataAccesssAsync<EmailTemplate> dataAccess, IDataAccesssAsync<EmailLog> dataAccessLog, EmailService emailService)
         {
             _emailService = emailService;   
             _dataAccessLog = dataAccessLog;
             _dataAccess = dataAccess;
         }
 
-        public async Task<IEnumerable<Email>> GetAllEmails()
+        public async Task<IEnumerable<EmailTemplate>> GetAllEmails()
         {
             try
             {
@@ -31,7 +31,7 @@ namespace AutoLegalTracker_API.Business
             }
         }
 
-        public async Task<Email> GetEmailById(int id)
+        public async Task<EmailTemplate> GetEmailById(int id)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace AutoLegalTracker_API.Business
             }
         }
 
-        public async Task<Email> CreateEmail(Email forecast)
+        public async Task<EmailTemplate> CreateEmail(EmailTemplate forecast)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace AutoLegalTracker_API.Business
             }
         }
 
-        public async Task UpdateEmail(Email forecast)
+        public async Task UpdateEmail(EmailTemplate forecast)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace AutoLegalTracker_API.Business
             }
         }
 
-        public async Task<Email> DeleteEmail(int id)
+        public async Task<EmailTemplate> DeleteEmail(int id)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace AutoLegalTracker_API.Business
         }
 
         #region EmailLog Methods
-        internal async Task <EmailLog> SendEmail(EmailCode eventCode, string userTo)
+        internal async Task <EmailLog> SendEmail(EmailTemplateEnum eventCode, string userTo)
         {
             var emailTemplate = GetAllEmails().Result.FirstOrDefault(x => x.emailCode == eventCode);
 
@@ -98,7 +98,7 @@ namespace AutoLegalTracker_API.Business
             var emailLog = new EmailLog {
                 UserTo = userTo,
                 EmailDate = DateTime.Now,
-                EmailId = emailTemplate.Id
+                EmailTemplateId = emailTemplate.Id
             };
 
             return await _dataAccessLog.Insert(emailLog);

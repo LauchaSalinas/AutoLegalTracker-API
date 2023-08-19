@@ -34,8 +34,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="5_WebServices\" />
+    <None Remove="0_Common\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="5_WebServices\" />
+    <Folder Include="0_Common\" />
   </ItemGroup>
 </Project>

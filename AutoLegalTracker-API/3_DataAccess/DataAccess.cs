@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -105,9 +106,21 @@ namespace AutoLegalTracker_API.DataAccess
                 _context.Entry(entity).State = EntityState.Modified;
                 await Save();
             }
+            catch (Exception)
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<IEnumerable<T>> Query(Expression<Func<T, bool>> predicate)
+        {
+            try
+            {
+                return await EntitySet.Where(predicate).ToListAsync();
+            }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error while updating entity.", ex);
+                throw new ApplicationException("Error while querying entities.", ex);
             }
         }
     }
