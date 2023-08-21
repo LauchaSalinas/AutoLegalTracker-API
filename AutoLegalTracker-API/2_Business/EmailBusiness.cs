@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AutoLegalTracker_API.Business
 {
-    public class EmailBLL
+    public class EmailBusiness
     {
         private readonly IDataAccesssAsync<EmailTemplate> _dataAccess;
         private readonly IDataAccesssAsync<EmailLog> _dataAccessLog;
         private readonly EmailService _emailService;
 
-        public EmailBLL(IDataAccesssAsync<EmailTemplate> dataAccess, IDataAccesssAsync<EmailLog> dataAccessLog, EmailService emailService)
+        public EmailBusiness(IDataAccesssAsync<EmailTemplate> dataAccess, IDataAccesssAsync<EmailLog> dataAccessLog, EmailService emailService)
         {
             _emailService = emailService;   
             _dataAccessLog = dataAccessLog;

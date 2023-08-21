@@ -1,4 +1,5 @@
-﻿using AutoLegalTracker_API.DataAccess;
+﻿using AutoLegalTracker_API._5_WebServices;
+using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Models;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
@@ -17,80 +18,54 @@ namespace AutoLegalTracker_API.Business
         private readonly IConfiguration _configuration;
         private readonly JwtBusiness _jwtBusiness;
         private readonly IDataAccesssAsync<User> _userAccess;
+        private readonly GoogleOAuth2Service _googleOAuth2Service;
 
-        public UserBusiness(IConfiguration configuration, JwtBusiness jwtBusiness)
+        public UserBusiness(IConfiguration configuration, JwtBusiness jwtBusiness, IDataAccesssAsync<User> userAccess, GoogleOAuth2Service _OAuth2Service)
 		{
             _configuration = configuration;
             _jwtBusiness = jwtBusiness;
-		}
+            _userAccess = userAccess;
+            _googleOAuth2Service = _OAuth2Service;
 
-		public async Task<string> ExchangeToken (string oneTimeTokenString)
-		{
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            string clientSecret = _configuration["OAUTH2_CLIENT_SECRET"] ?? string.Empty;
-            string redirectUri = _configuration["OAUTH2_REDIRECT_URI"] ?? string.Empty;
+        }
 
+        public async Task<User> GetUser(string oneTimeTokenString)
+        {
             // Exchange the one time token for a TokenResponse with an access token and a refresh token
-            TokenResponse tokenResponse = new AuthorizationCodeTokenRequest
-            {
-                Code = oneTimeTokenString,
-                ClientId = clientID,
-                ClientSecret = clientSecret,
-                RedirectUri = redirectUri,
-            }.ExecuteAsync(new HttpClient(), GoogleAuthConsts.OidcTokenUrl, CancellationToken.None, SystemClock.Default).Result;
-
-            // Define the google authentification flow and initialize it with the clientID and clientSecret
-            GoogleAuthorizationCodeFlow.Initializer initializer = new GoogleAuthorizationCodeFlow.Initializer
-            {
-                ClientSecrets = new ClientSecrets() { ClientId = clientID, ClientSecret = clientSecret },
-            };
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(initializer);
-
-            // Define a UserCredential with the flow and the tokenResponse to be able to make requests to the google api
-            UserCredential credential = new UserCredential(
-            flow,
-            "user",
-            tokenResponse);
-
-            // Define a service to make requests to the google api
-            var meService = new Oauth2Service(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = clientID
-            });
-
-            //get the audience from the google api
-            //var tokenInfo = meService.Tokeninfo().Execute();
-            //tokenInfo.ExpiresIn
-
+            var credential = await _googleOAuth2Service.ExchangeToken(oneTimeTokenString);
             // Make a request to the google api to get the user info
-            Userinfo meObject = new UserinfoResource.V2Resource.MeResource.GetRequest(meService).Execute();
-
-            // TODO: Missing validation of the user info
-            // TODO: Mising try catch
-            // TODO: Create custom exception
-            // TODO: Missing logging
-
-            // TODO: Missing saving of the user info in the database
-            var user = new User
+            var meObject = _googleOAuth2Service.GetMeObject(credential);
+            // Search for the user in the database
+            var user = await GetUserFromSub(meObject.Id);
+            // If the user is not found in the database create a new user
+            if (user == null)
             {
-                Id = 0,
-                Sub = meObject.Id,
-                Name = String.Concat(meObject.Name, " ", meObject.FamilyName),
-                Email = meObject.Email,
-                WebCredentialUser = null,
-                WebCredentialPassword = null
-            };
-            var userList = await _userAccess.Query(user => user.Sub == meObject.Id);
-            User userFound = userList.FirstOrDefault() ?? throw new ApplicationException("User was not found in the database");
-
-
-            var jwtToken = _jwtBusiness.CreateJwt(meObject);
-
-            var returnToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
-
-
-            return returnToken;
+                user = new User
+                {
+                    Id = 0,
+                    Sub = meObject.Id,
+                    Name = meObject.Name,
+                    FamilyName = meObject.FamilyName,
+                    Email = meObject.Email,
+                    GoogleProfilePicture = meObject.Picture,
+                    WebCredentialUser = null,
+                    WebCredentialPassword = null,
+                    GoogleOAuth2AccessToken = credential.Token.AccessToken,
+                    GoogleOAuth2RefreshToken = credential.Token.RefreshToken,
+                    GoogleOAuth2TokenExpiration = credential.Token.ExpiresInSeconds,
+                    GoogleOAuth2TokenCreatedAt = credential.Token.IssuedUtc,
+                    GoogleOAuth2IdToken = credential.Token.IdToken
+                };
+                await _userAccess.Insert(user);
+            }
+            
+            return user;
+        }
+        public async Task<User> GetUserFromSub(string userSub)
+        {
+            var userList = await _userAccess.Query(user => user.Sub == userSub);
+            User user = userList.FirstOrDefault();
+            return user;
         }
 
         public async Task SetScrappingCredentials(string userSub, string credentialUsername, string credentialPassword)
@@ -106,6 +81,7 @@ namespace AutoLegalTracker_API.Business
 
             // Test Credentials
             // Send them to the Puppeteer to get the confirmation.
+            // TODO SOtero: Implement Puppeteer
             //var successfulLogin = puppetterService.login(credentialUsername, credentialPassword);
             var successfulLogin = true;
 

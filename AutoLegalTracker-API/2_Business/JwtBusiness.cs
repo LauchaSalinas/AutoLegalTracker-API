@@ -15,10 +15,10 @@ namespace AutoLegalTracker_API.Business
             _configuration = configuration;
         }
 
-        public JwtSecurityToken CreateJwt(Userinfo meObject)
+        public string CreateJwt(User user)
         {
             // Create the claims for the JWT token
-            var claims = GetClaims(meObject);
+            var claims = GetClaims(user);
 
             // Create the key and the signing credentials for the JWT token
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"] ?? String.Empty));
@@ -29,25 +29,23 @@ namespace AutoLegalTracker_API.Business
                     issuer: _configuration["JWT_ISSUER"] ?? String.Empty,
                     audience: _configuration["JWT_AUDIENCE"] ?? String.Empty,
                     claims: claims,
-                    expires: DateTime.UtcNow.AddDays(1),
                     signingCredentials: signIn
                 );
-
-            return jwtToken;
+            return new JwtSecurityTokenHandler().WriteToken(jwtToken);
         }
 
-        private Claim[] GetClaims(Userinfo meObject)
+        private Claim[] GetClaims(User user)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, meObject.Id),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Sub),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, meObject.Email),
-                new Claim(JwtRegisteredClaimNames.GivenName, meObject.GivenName),
-                new Claim(JwtRegisteredClaimNames.FamilyName, meObject.FamilyName),
-                // TODO create custom claims
-
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.GivenName, user.Name),
+                new Claim(JwtRegisteredClaimNames.FamilyName, user.FamilyName),
+                new Claim("ImageUrl", user.GoogleProfilePicture),
+                new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(30)).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
                 new Claim("Environment", _configuration["ASPNETCORE_ENVIRONMENT"] ?? string.Empty)
             };
 

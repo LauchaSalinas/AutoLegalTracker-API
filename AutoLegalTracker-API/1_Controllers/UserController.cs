@@ -1,13 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 using AutoLegalTracker_API.Business;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace ALTDeployTest.Controllers
 {
@@ -19,124 +15,97 @@ namespace ALTDeployTest.Controllers
 
         private IConfiguration _configuration;
         private UserBusiness _userBusiness;
+        private JwtBusiness _jwtBusiness;
 
-        public UserController(IConfiguration configuration, UserBusiness userBusiness)
+        public UserController(IConfiguration configuration, UserBusiness userBusiness, JwtBusiness jwtBusiness)
         {
             _configuration = configuration;
             _userBusiness = userBusiness;
+            _jwtBusiness = jwtBusiness;
         }
 
         #endregion Constructor
 
         #region Public Methods
 
-        [HttpPost]
-        [Route("login")]
-        public ActionResult<string> LogIn([FromBody] LoginRequestModel loginRequest)
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult> LogInAsync([FromBody] LoginRequestModel loginRequest)
         {
-            if (loginRequest != null)
-            {
-                // TODO: MISSING VALIDATION OF TOKEN
-
-                var returnToken = _userBusiness.ExchangeToken(loginRequest.OneTimeToken);
-
-                // Return the JWT token
-                return StatusCode(StatusCodes.Status200OK, returnToken);
-            }
-
-            return StatusCode(StatusCodes.Status400BadRequest);
-        }
-
-        [HttpPost]
-        [Route("signup")]
-        public ActionResult SignUp()
-        {
-            // Authenticate user (replace with your authentication logic)
-            //if (IsValidCredentials(username, password))
-            //{
-            // Create an authentication token (replace with your token generation logic)
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, "123456"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, "email@email.com"),
-                new Claim(JwtRegisteredClaimNames.GivenName, "Lautaro"),
-                new Claim(JwtRegisteredClaimNames.FamilyName, "Salinas"),
-                // TODO create custom claims
-
-                new Claim("Environment", _configuration["ASPNETCORE_ENVIRONMENT"] ?? string.Empty)
-            };
-
-            // Create the key and the signing credentials for the JWT token
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"] ?? String.Empty));
-            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-
-            var jwtToken = new JwtSecurityToken(
-                issuer: _configuration["JWT_ISSUER"] ?? String.Empty,
-                audience: _configuration["JWT_AUDIENCE"] ?? String.Empty,
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
-                signingCredentials: signIn
-            );
-            var returnToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
-
-
-            // Create an HttpOnly cookie to store the token
-            var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true, // Optional: Set to true if your site uses HTTPS
-                    //SameSite = SameSiteMode.Lax // Optional: Set the appropriate SameSite policy
-                };
-
-                Response.Cookies.Append("AuthToken", returnToken, cookieOptions);
-
-                // Return success response
-                return Ok(new { message = "Authentication successful." });
-            //}
-
-            // Invalid credentials
-            return Unauthorized(new { message = "Invalid username or password." });
-        }
-
-        [HttpPost]
-        [Route("signout")]
-        public ActionResult SignOut()
-        {
-            return new JsonResult(new { key1 = "test" });
-        }
-
-        [Authorize]
-        [HttpPost("setscrappingcredentials")]
-        public async Task<ActionResult> SetScrappingCredentialsAsync([FromBody] ScrappingCredentialsModel credentials)
-        {
-            // QUE HACE UN CONTROLLER? VALIDAR LOS DATOS ENVIADOS
             if (!ModelState.IsValid)
             {
                 // Model validation failed, return a Bad Request response
                 return BadRequest(ModelState);
             }
-
-            var userSub = HttpContext.User.FindFirst("Sub")?.ToString();
-
-            if (String.IsNullOrEmpty(userSub))
-                return new BadRequestObjectResult(new { error = "User error" });
-
             try
             {
-                // QUE HACE EL BUSINESS?
-                        // 1. TIENE NOMBRE DE PROCESO DE NEGOCIO
-                        // 2. CONTACTA SERVICIOS Y DATA ACCESS PARA DEVOLVER UN RESULTADO
-                await _userBusiness.SetScrappingCredentials(userSub, credentials.Username, credentials.Password);
+                // From user business we will reach google OAuth2 service to exchange the one time token for a TokenResponse with an access token and a refresh token, we will return a user object with the tokens
+                var user = await _userBusiness.GetUser(loginRequest.OneTimeToken);
+                // From jwt business we will create a JWT token from the user object
+                var returnToken = _jwtBusiness.CreateJwt(user);
 
-                return new OkResult();
+                // Create an HttpOnly cookie to store the token
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Optional: Set to true if your site uses HTTPS
+                    SameSite = SameSiteMode.None, // Optional: Set the appropriate SameSite policy
+                    Domain = "localhost",
+                    Path = "/",
+                    Expires = DateTime.UtcNow.AddDays(30)
+                };
+
+                Response.Cookies.Append("AuthToken", returnToken, cookieOptions);
+                // Return the JWT token
+                return StatusCode(StatusCodes.Status200OK, returnToken);
             }
             catch (ApplicationException appex)
             {
-                return BadRequest(new {error = appex });
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("signup")]
+        public async Task<ActionResult> SignUpAsync([FromBody] LoginRequestModel loginRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Model validation failed, return a Bad Request response
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                // From user business we will reach google OAuth2 service to exchange the one time token for a TokenResponse with an access token and a refresh token, we will return a user object with the tokens
+                var user = await _userBusiness.GetUser(loginRequest.OneTimeToken);
+                // From jwt business we will create a JWT token from the user object
+                var returnToken = _jwtBusiness.CreateJwt(user);
+
+                // Create an HttpOnly cookie to store the token
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Optional: Set to true if your site uses HTTPS
+                    SameSite = SameSiteMode.None, // Optional: Set the appropriate SameSite policy
+                    Domain = "localhost",
+                    Path = "/",
+                    Expires = DateTime.UtcNow.AddDays(30)
+                };
+
+                Response.Cookies.Append("AuthToken", returnToken, cookieOptions);
+                // Return the JWT token
+                return StatusCode(StatusCodes.Status200OK, returnToken);
+            }
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
             }
             catch (Exception ex)
             {
@@ -161,15 +130,51 @@ namespace ALTDeployTest.Controllers
         }
 
         [Authorize]
-        [HttpPost("getinfo")]
-        public ActionResult GetUserInfo()
+        [HttpGet("Info")]
+        public ActionResult Info()
         {
-            var userSub = HttpContext.User.Claims.First();
+            var name = HttpContext.User.FindFirst(ClaimTypes.GivenName)?.Value.ToString();
+            var imageUrl = HttpContext.User.FindFirst("ImageUrl")?.Value.ToString();
 
-            // Clear the user's session on the server
-            // Perform any necessary cleanup (e.g., token revocation)
-            
-            return new JsonResult(new {user = userSub.ToString()});
+            return new JsonResult(new { name = name, imageUrl = imageUrl });
+        }
+
+        [Authorize]
+        [HttpPost("setscrappingcredentials")]
+        public async Task<ActionResult> SetScrappingCredentialsAsync([FromBody] ScrappingCredentialsModel credentials)
+        {
+            // QUE HACE UN CONTROLLER? VALIDAR LOS DATOS ENVIADOS
+            if (!ModelState.IsValid)
+            {
+                // Model validation failed, return a Bad Request response
+                return BadRequest(ModelState);
+            }
+
+            var userSub = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value.ToString();
+
+            if (String.IsNullOrEmpty(userSub))
+                return new BadRequestObjectResult(new { error = "User error" });
+
+            try
+            {
+                // QUE HACE EL BUSINESS?
+                // 1. TIENE NOMBRE DE PROCESO DE NEGOCIO
+                // 2. CONTACTA SERVICIOS Y DATA ACCESS PARA DEVOLVER UN RESULTADO
+                await _userBusiness.SetScrappingCredentials(userSub, credentials.Username, credentials.Password);
+
+                return new OkResult();
+            }
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
         }
 
         #endregion Public Methods

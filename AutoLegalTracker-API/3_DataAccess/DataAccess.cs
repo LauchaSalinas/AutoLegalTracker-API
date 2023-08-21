@@ -120,7 +120,7 @@ namespace AutoLegalTracker_API.DataAccess
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error while querying entities.", ex);
+                throw; //new ApplicationException("Error while querying entities.", ex);
             }
         }
     }

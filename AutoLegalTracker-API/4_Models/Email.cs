@@ -8,12 +8,9 @@ namespace AutoLegalTracker_API.Models
     {
         [Key]
         public int Id { get; set; }
-
         public EmailTemplateEnum emailCode { get; set; }
-
         public string Subject { get; set; }
         public string Body { get; set; }
-
         public virtual ICollection<EmailLog> EmailLogs { get; set; }
     }
 
@@ -27,7 +24,6 @@ namespace AutoLegalTracker_API.Models
         public int EmailTemplateId { get; set; }
 
         // Creating an email object and indicating which property is the FK
-        //TODO check why this is getting to the controller 
         [ForeignKey("EmailTemplateId")]
         public virtual EmailTemplate Email { get; set; }
     }

@@ -7,8 +7,7 @@ using Microsoft.OpenApi.Models;
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
-
-
+using AutoLegalTracker_API._5_WebServices;
 
 namespace AutoLegalTracker_API
 {
@@ -22,14 +21,16 @@ namespace AutoLegalTracker_API
 
             builder.Services.AddControllers();
 
+            #region Dependency Injection
+
             // Add dependency injection to the Business Logic Layer
             builder.Services.AddTransient<JwtBusiness>();
             builder.Services.AddTransient<UserBusiness>();
-            builder.Services.AddTransient<WeatherForecastBLL>();
-            builder.Services.AddTransient<EmailBLL>();
+            builder.Services.AddTransient<WeatherForecastBusiness>();
+            builder.Services.AddTransient<EmailBusiness>();
             // Add dependency injection to the Services Layer
             builder.Services.AddTransient<EmailService>();
-            // TODO Add dependency injection to the Data Access Layer
+            builder.Services.AddTransient<GoogleOAuth2Service>();
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
@@ -42,42 +43,16 @@ namespace AutoLegalTracker_API
                 return schedulerFactory.GetScheduler().Result;
             });
 
+            
+
             // Add Quartz scheduler service
             builder.Services.AddSingleton<CronService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+            builder.Services.AddSwaggerGen();
 
-                // Add the Bearer token authorization option
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                });
-
-                // Make sure the security requirement includes the "Bearer" option
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
-            });
+            #endregion Dependency Injection
 
             builder.Services.AddDbContext<ALTContext>(options =>
             {
@@ -85,16 +60,18 @@ namespace AutoLegalTracker_API
                 options.UseSqlServer(connectionString);
             });
 
+            #region CORS and Security
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", builder =>
+                options.AddPolicy("AllowSpecificOrigin", corsBuilder =>
                 {
-                    builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
+                    corsBuilder.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
                 });
             });
-
 
             // Add Authentication
             builder.Services.AddAuthentication(options =>
@@ -114,12 +91,21 @@ namespace AutoLegalTracker_API
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT_KEY"] ?? String.Empty))
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["AuthToken"];
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
+            #endregion CORS and Security
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -139,7 +125,7 @@ namespace AutoLegalTracker_API
 
 
             app.UseHttpsRedirection();
-            app.UseCors(app => app.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors(app => app.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseAuthentication();
             app.UseAuthorization();
 

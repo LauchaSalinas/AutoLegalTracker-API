@@ -13,5 +13,6 @@ namespace AutoLegalTracker_API.DataAccess
         // Indicando que la BD tiene una tabla llamada Emails
         public DbSet<EmailTemplate> Emails { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
+        public DbSet<User> User { get; set; }
     }
 }
