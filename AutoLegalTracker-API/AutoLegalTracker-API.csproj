@@ -21,6 +21,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="PuppeteerSharp" Version="11.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Quartz" Version="3.7.0" />
   </ItemGroup>
@@ -34,8 +35,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="5_WebServices\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="5_WebServices\" />
   </ItemGroup>
 </Project>
