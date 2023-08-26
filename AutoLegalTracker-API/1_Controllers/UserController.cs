@@ -1,10 +1,11 @@
-﻿using AutoLegalTracker_API.Business;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Newtonsoft.Json;
 
-public class LoginRequestModel
-{
-    public string OneTimeToken { get; set; } = string.Empty;
-}
+using AutoLegalTracker_API.Business;
+using AutoLegalTracker_API.Models;
 
 namespace ALTDeployTest.Controllers
 {
@@ -16,55 +17,192 @@ namespace ALTDeployTest.Controllers
 
         private IConfiguration _configuration;
         private UserBusiness _userBusiness;
+        private JwtBusiness _jwtBusiness;
 
-        public UserController(IConfiguration configuration, UserBusiness userBusiness)
+        public UserController(IConfiguration configuration, UserBusiness userBusiness, JwtBusiness jwtBusiness)
         {
             _configuration = configuration;
             _userBusiness = userBusiness;
+            _jwtBusiness = jwtBusiness;
         }
 
         #endregion Constructor
 
         #region Public Methods
 
-        [HttpPost]
-        [Route("login")]
-        public ActionResult<string> LogIn([FromBody] LoginRequestModel loginRequest)
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult> LogInAsync([FromBody] LoginRequestModel loginRequest)
         {
-            if (loginRequest != null)
+            if (!ModelState.IsValid)
             {
-                // TODO: MISSING VALIDATION OF TOKEN
+                // Model validation failed, return a Bad Request response
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                // From user business we will reach google OAuth2 service to exchange the one time token for a TokenResponse with an access token and a refresh token, we will return a user object with the tokens
+                var user = await _userBusiness.AddOrUpdateUser(loginRequest.OneTimeToken);
+                // From jwt business we will create a JWT token from the user object
+                var returnToken = _jwtBusiness.CreateJwt(user);
 
-                var returnToken = _userBusiness.ExchangeToken(loginRequest.OneTimeToken);
+                // Create an HttpOnly cookie to store the token
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Optional: Set to true if your site uses HTTPS
+                    SameSite = SameSiteMode.None, // Optional: Set the appropriate SameSite policy
+                    Domain = "localhost",
+                    Path = "/",
+                    Expires = DateTime.UtcNow.AddDays(30)
+                };
 
+                Response.Cookies.Append("AuthToken", returnToken, cookieOptions);
                 // Return the JWT token
                 return StatusCode(StatusCodes.Status200OK, returnToken);
             }
-
-            return StatusCode(StatusCodes.Status400BadRequest);
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
         }
 
-        [HttpPost]
-        [Route("signup")]
-        public ActionResult SignUp()
+        [AllowAnonymous]
+        [HttpPost("signup")]
+        public async Task<ActionResult> SignUpAsync([FromBody] LoginRequestModel loginRequest)
         {
-            return new JsonResult(new { key1 = "test"});
+            if (!ModelState.IsValid)
+            {
+                // Model validation failed, return a Bad Request response
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                // From user business we will reach google OAuth2 service to exchange the one time token for a TokenResponse with an access token and a refresh token, we will return a user object with the tokens
+                var user = await _userBusiness.AddOrUpdateUser(loginRequest.OneTimeToken);
+                // From jwt business we will create a JWT token from the user object
+                var returnToken = _jwtBusiness.CreateJwt(user);
+
+                // Create an HttpOnly cookie to store the token
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Optional: Set to true if your site uses HTTPS
+                    SameSite = SameSiteMode.None, // Optional: Set the appropriate SameSite policy
+                    Domain = "localhost",
+                    Path = "/",
+                    Expires = DateTime.UtcNow.AddDays(30)
+                };
+
+                Response.Cookies.Append("AuthToken", returnToken, cookieOptions);
+                // Return the JWT token
+                return StatusCode(StatusCodes.Status200OK, returnToken);
+            }
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
         }
 
-        [HttpPost]
-        [Route("signout")]
-        public ActionResult SignOut()
+        [Authorize]
+        [HttpPost("logout")]
+        public ActionResult Logout()
         {
-            return new JsonResult(new { key1 = "test" });
+            // Clear the user's session on the server
+            // Perform any necessary cleanup (e.g., token revocation)
+
+            // Clear the HttpOnly cookie on the client side
+            Response.Cookies.Delete("AuthToken");
+
+            return Ok();
         }
 
-        [HttpPost]
-        [Route("setscrappingcredentials")]
-        public ActionResult SetScrappingCredentials()
+        [Authorize]
+        [HttpGet("Info")]
+        public ActionResult Info()
         {
-            return new JsonResult(new { key1 = "test" });
+            // TODO : Get user info from database instead of cookie
+            var name = HttpContext.User.FindFirst(ClaimTypes.GivenName)?.Value.ToString();
+            var imageUrl = HttpContext.User.FindFirst("ImageUrl")?.Value.ToString();
+
+            return new JsonResult(new { name = name, imageUrl = imageUrl });
+        }
+
+        [Authorize]
+        [HttpPost("setscrappingcredentials")]
+        public async Task<ActionResult> SetScrappingCredentialsAsync([FromBody] ScrappingCredentialsModel credentials)
+        {
+            // QUE HACE UN CONTROLLER? VALIDAR LOS DATOS ENVIADOS
+            if (!ModelState.IsValid)
+            {
+                // Model validation failed, return a Bad Request response
+                return BadRequest(ModelState);
+            }
+
+            User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
+            if (user == null)
+                return new BadRequestObjectResult(new { error = "User error" });
+
+            try
+            {
+                // QUE HACE EL BUSINESS?
+                // 1. TIENE NOMBRE DE PROCESO DE NEGOCIO
+                // 2. CONTACTA SERVICIOS Y DATA ACCESS PARA DEVOLVER UN RESULTADO
+                await _userBusiness.SetScrappingCredentials(user, credentials.Username, credentials.Password);
+
+                return new OkResult();
+            }
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
         }
 
         #endregion Public Methods
     }
+
+    #region Controller models
+
+    public class LoginRequestModel
+    {
+        [Required]
+        [StringLength(200, MinimumLength = 30, ErrorMessage = "Token is required")]
+        public string OneTimeToken { get; set; } = string.Empty;
+    }
+
+    public class ScrappingCredentialsModel
+    {
+        [Required]
+        [StringLength(50, MinimumLength = 5, ErrorMessage = "Username must be between 3 and 50 characters.")]
+        [DataType(DataType.EmailAddress)]
+        public string? Username { get; set; }
+
+        [Required]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
+        [DataType(DataType.Password)]
+        public string? Password { get; set; }
+    }
+
+    #endregion Controller models
 }

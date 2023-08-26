@@ -13,11 +13,11 @@ namespace AutoLegalTracker_API.Controllers
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
-        private readonly WeatherForecastBLL _weatherForecastBLL;
-        private readonly EmailBLL _email;
+        private readonly WeatherForecastBusiness _weatherForecastBLL;
+        private readonly EmailBusiness _email;
 
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL, EmailBLL mail)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBusiness weatherForecastBLL, EmailBusiness mail)
         {
             _email = mail;
             _logger = logger;

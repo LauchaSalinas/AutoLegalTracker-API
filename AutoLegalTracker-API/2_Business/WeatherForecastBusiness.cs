@@ -6,11 +6,11 @@ using AutoLegalTracker_API.Models;
 
 namespace AutoLegalTracker_API.Business
 {
-    public class WeatherForecastBLL
+    public class WeatherForecastBusiness
     {
         private readonly IDataAccesssAsync<WeatherForecast> _dataAccess;
 
-        public WeatherForecastBLL(IDataAccesssAsync<WeatherForecast> dataAccess)
+        public WeatherForecastBusiness(IDataAccesssAsync<WeatherForecast> dataAccess)
         {
             _dataAccess = dataAccess;
         }
