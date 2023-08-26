@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace AutoLegalTracker_API._3_DataAccess.Migrations
+namespace AutoLegalTracker_API.DataAccess.Migrations
 {
     public partial class _2_update_to_user_model : Migration
     {

@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Newtonsoft.Json;
 
 using AutoLegalTracker_API.Business;
+using AutoLegalTracker_API.Models;
 
 namespace ALTDeployTest.Controllers
 {
@@ -40,7 +42,7 @@ namespace ALTDeployTest.Controllers
             try
             {
                 // From user business we will reach google OAuth2 service to exchange the one time token for a TokenResponse with an access token and a refresh token, we will return a user object with the tokens
-                var user = await _userBusiness.GetUser(loginRequest.OneTimeToken);
+                var user = await _userBusiness.AddOrUpdateUser(loginRequest.OneTimeToken);
                 // From jwt business we will create a JWT token from the user object
                 var returnToken = _jwtBusiness.CreateJwt(user);
 
@@ -84,7 +86,7 @@ namespace ALTDeployTest.Controllers
             try
             {
                 // From user business we will reach google OAuth2 service to exchange the one time token for a TokenResponse with an access token and a refresh token, we will return a user object with the tokens
-                var user = await _userBusiness.GetUser(loginRequest.OneTimeToken);
+                var user = await _userBusiness.AddOrUpdateUser(loginRequest.OneTimeToken);
                 // From jwt business we will create a JWT token from the user object
                 var returnToken = _jwtBusiness.CreateJwt(user);
 
@@ -133,6 +135,7 @@ namespace ALTDeployTest.Controllers
         [HttpGet("Info")]
         public ActionResult Info()
         {
+            // TODO : Get user info from database instead of cookie
             var name = HttpContext.User.FindFirst(ClaimTypes.GivenName)?.Value.ToString();
             var imageUrl = HttpContext.User.FindFirst("ImageUrl")?.Value.ToString();
 
@@ -150,9 +153,8 @@ namespace ALTDeployTest.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userSub = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value.ToString();
-
-            if (String.IsNullOrEmpty(userSub))
+            User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
+            if (user == null)
                 return new BadRequestObjectResult(new { error = "User error" });
 
             try
@@ -160,7 +162,7 @@ namespace ALTDeployTest.Controllers
                 // QUE HACE EL BUSINESS?
                 // 1. TIENE NOMBRE DE PROCESO DE NEGOCIO
                 // 2. CONTACTA SERVICIOS Y DATA ACCESS PARA DEVOLVER UN RESULTADO
-                await _userBusiness.SetScrappingCredentials(userSub, credentials.Username, credentials.Password);
+                await _userBusiness.SetScrappingCredentials(user, credentials.Username, credentials.Password);
 
                 return new OkResult();
             }

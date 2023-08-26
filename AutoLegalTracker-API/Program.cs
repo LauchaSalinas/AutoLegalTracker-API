@@ -7,7 +7,8 @@ using Microsoft.OpenApi.Models;
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
-using AutoLegalTracker_API._5_WebServices;
+using AutoLegalTracker_API.WebServices;
+using AutoLegalTracker_API.DataAccess;
 
 namespace AutoLegalTracker_API
 {
@@ -29,8 +30,8 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<WeatherForecastBusiness>();
             builder.Services.AddTransient<EmailBusiness>();
             // Add dependency injection to the Services Layer
-            builder.Services.AddTransient<EmailService>();
-            builder.Services.AddTransient<GoogleOAuth2Service>();
+            builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<GoogleOAuth2Service>();
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AutoLegalTracker_API._3_DataAccess.Migrations
+namespace AutoLegalTracker_API.DataAccess.Migrations
 {
     public partial class _2_adding_user_to_context3 : Migration
     {

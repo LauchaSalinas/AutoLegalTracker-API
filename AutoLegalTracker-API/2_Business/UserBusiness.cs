@@ -1,15 +1,8 @@
-﻿using AutoLegalTracker_API._5_WebServices;
+﻿using System.Security.Claims;
+
+using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Models;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2.Requests;
-using Google.Apis.Auth.OAuth2.Responses;
-using Google.Apis.Oauth2.v2;
-using Google.Apis.Oauth2.v2.Data;
-using Google.Apis.Services;
-using Google.Apis.Util;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace AutoLegalTracker_API.Business
 {
@@ -26,10 +19,17 @@ namespace AutoLegalTracker_API.Business
             _jwtBusiness = jwtBusiness;
             _userAccess = userAccess;
             _googleOAuth2Service = _OAuth2Service;
-
         }
 
-        public async Task<User> GetUser(string oneTimeTokenString)
+        /// <summary>
+        /// Once the user has logged in with google, the API exchanges the one-time Token 
+        /// for the AccessToken and RefreshToken so we can get the user info from the google api 
+        /// and we search for the user in the database. If the user is not found in the database
+        /// we create a new user.
+        /// </summary>
+        /// <param name="oneTimeTokenString"></param>
+        /// <returns>User from db or new User</returns>
+        public async Task<User> AddOrUpdateUser(string oneTimeTokenString)
         {
             // Exchange the one time token for a TokenResponse with an access token and a refresh token
             var credential = await _googleOAuth2Service.ExchangeToken(oneTimeTokenString);
@@ -58,23 +58,17 @@ namespace AutoLegalTracker_API.Business
                 };
                 await _userAccess.Insert(user);
             }
+            else
+            {
+                await _userAccess.Update(user);
+            }
             
             return user;
         }
-        public async Task<User> GetUserFromSub(string userSub)
-        {
-            var userList = await _userAccess.Query(user => user.Sub == userSub);
-            User user = userList.FirstOrDefault();
-            return user;
-        }
+        
 
-        public async Task SetScrappingCredentials(string userSub, string credentialUsername, string credentialPassword)
+        public async Task SetScrappingCredentials(User user, string credentialUsername, string credentialPassword)
         {
-            // get user model from sub
-            // User model = send userSub
-            var userList = await _userAccess.Query(user => user.Sub == userSub);
-            User user = userList.FirstOrDefault() ?? throw new ApplicationException("User was not found in the database");
-
             // check if credentials are the same that the ones that we have stored
             if (credentialPassword == user.WebCredentialPassword && user.WebCredentialUser == credentialUsername)
                 throw new ApplicationException("Credentials have already been set");
@@ -100,6 +94,19 @@ namespace AutoLegalTracker_API.Business
             {
                 throw new Exception();
             }
+        }
+
+        public async Task<User> GetUserFromCookie(ClaimsPrincipal claimsPrincipal)
+        {
+            var userSub = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await GetUserFromSub(userSub);
+            return user;
+        }
+        private async Task<User> GetUserFromSub(string userSub)
+        {
+            var userList = await _userAccess.Query(user => user.Sub == userSub);
+            User user = userList.FirstOrDefault();
+            return user;
         }
     }
 }

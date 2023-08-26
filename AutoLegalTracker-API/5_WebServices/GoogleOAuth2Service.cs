@@ -7,18 +7,19 @@ using Google.Apis.Oauth2.v2;
 using Google.Apis.Services;
 using Google.Apis.Util;
 using Google.Apis.Drive.v3;
-using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Calendar.v3;
-using Google.Apis.Calendar.v3.Data;
 
-namespace AutoLegalTracker_API._5_WebServices
+using AutoLegalTracker_API.Models;
+
+namespace AutoLegalTracker_API.WebServices
 {
     public class GoogleOAuth2Service
     {
         #region Constructor
+
         private readonly IConfiguration _configuration;
         private readonly GoogleAuthorizationCodeFlow _flow; // Flow: https://frontegg.com/blog/oauth-flows
+        private UserCredential? _credential;
 
         public GoogleOAuth2Service(IConfiguration configuration)
         {
@@ -26,21 +27,64 @@ namespace AutoLegalTracker_API._5_WebServices
             _flow = GetGoogleAuthorizationCodeFlow();
         }
 
+        public GoogleOAuth2Service Set(User user)
+        {
+            var tokenResponse = GetTokenResponse(user.GoogleOAuth2AccessToken, user.GoogleOAuth2RefreshToken, user.GoogleOAuth2IdToken);
+            _credential = GetUserCredential(_flow, tokenResponse);
+            return this;
+        }
+
         private GoogleAuthorizationCodeFlow GetGoogleAuthorizationCodeFlow()
         {
             string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
             string clientSecret = _configuration["OAUTH2_CLIENT_SECRET"] ?? string.Empty;
 
+            // Define the scopes for the google api
+            string[] scopes = new string[]
+            {
+                Oauth2Service.Scope.UserinfoEmail,
+                Oauth2Service.Scope.UserinfoProfile,
+                DriveService.Scope.Drive,
+                CalendarService.Scope.Calendar
+            };
+
             // Define the google authentification flow and initialize it with the clientID and clientSecret
             GoogleAuthorizationCodeFlow.Initializer initializer = new GoogleAuthorizationCodeFlow.Initializer
             {
                 ClientSecrets = new ClientSecrets() { ClientId = clientID, ClientSecret = clientSecret },
+                Scopes = scopes
             };
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(initializer);
 
             return flow;
         }
         #endregion Constructor
+
+        #region GetServices for each API
+
+        public CalendarService GetCalendarService()
+        {
+            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
+            var calendarService = new CalendarService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = _credential,
+                ApplicationName = clientID
+            });
+            return calendarService;
+        }
+
+        public DriveService GetDriveService()
+        {
+            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
+            var driveService = new DriveService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = _credential,
+                ApplicationName = clientID
+            });
+            return driveService;
+        }
+
+        #endregion GetServices for each API
 
         #region ExchangeToken
         public async Task<UserCredential> ExchangeToken(string oneTimeTokenString)
@@ -51,7 +95,6 @@ namespace AutoLegalTracker_API._5_WebServices
 
             return credential;
         }
-
         private async Task<TokenResponse> GetTokenResponseAsync(string oneTimeTokenString)
         {
             string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
@@ -63,7 +106,7 @@ namespace AutoLegalTracker_API._5_WebServices
                 Code = oneTimeTokenString,
                 ClientId = clientID,
                 ClientSecret = clientSecret,
-                RedirectUri = redirectUri,
+                RedirectUri = redirectUri
             }.ExecuteAsync(new HttpClient(), GoogleAuthConsts.OidcTokenUrl, CancellationToken.None, SystemClock.Default);
             return tokenResponse;
         }
@@ -75,7 +118,31 @@ namespace AutoLegalTracker_API._5_WebServices
                 RefreshToken = refreshToken,
                 IdToken = tokenId,
             };
+            // check if the token is expired
+            // TODO is saying its expired when it's not, need to check this
+            if (token.IsExpired(SystemClock.Default))
+            {
+                // if the token is expired, refresh it
+                token = RefreshToken(token);
+            }
+
             return token;
+        }
+        // create refresh token from access token
+        private TokenResponse RefreshToken(TokenResponse token)
+        {
+            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
+            string clientSecret = _configuration["OAUTH2_CLIENT_SECRET"] ?? string.Empty;
+
+            var initializer = new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = new ClientSecrets() { ClientId = clientID, ClientSecret = clientSecret },
+            };
+            var flow = new GoogleAuthorizationCodeFlow(initializer);
+            var credential = new UserCredential(flow, "user", token);
+            var refreshToken = credential.Token.RefreshToken;
+            var newToken = credential.RefreshTokenAsync(CancellationToken.None).Result;
+            return credential.Token;
         }
         private UserCredential GetUserCredential(GoogleAuthorizationCodeFlow flow, TokenResponse tokenResponse)
         {
@@ -100,129 +167,11 @@ namespace AutoLegalTracker_API._5_WebServices
                 ApplicationName = clientID
             });
 
-            //get the audience from the google api
-            //var tokenInfo = meService.Tokeninfo().Execute();
-            //tokenInfo.ExpiresIn
-
             // Make a request to the google api to get the user info
             Userinfo meObject = meService.Userinfo.V2.Me.Get().Execute();
             return meObject;
         }
         #endregion User API
 
-        #region Drive API
-        private DriveService GetDriveService(UserCredential credential)
-        {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            // Define a service to make requests to the google api
-            var driveService = new DriveService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = clientID
-            });
-            return driveService;
-        }
-
-        private async Task<string> CreateFolder(DriveService driveService, string folderName)
-        {
-            // Create a folder in the root of the drive
-            var fileMetadata = new Google.Apis.Drive.v3.Data.File()
-            {
-                Name = folderName,
-                MimeType = "application/vnd.google-apps.folder"
-            };
-            var request = driveService.Files.Create(fileMetadata);
-            request.Fields = "id";
-            var file = await request.ExecuteAsync();
-            return file.Id;
-        }
-
-        #endregion Drive API
-
-        #region Sheets API
-        private SheetsService GetSheetsService(UserCredential credential)
-        {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            // Define a service to make requests to the google api
-            var sheetsService = new SheetsService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = clientID
-            });
-            return sheetsService;
-        }
-
-        private async Task<string> CreateSpreadsheet(SheetsService sheetsService, string spreadsheetName)
-        {
-            // Create a spreadsheet
-            var spreadsheet = new Spreadsheet()
-            {
-                Properties = new SpreadsheetProperties()
-                {
-                    Title = spreadsheetName
-                }
-            };
-            var request = sheetsService.Spreadsheets.Create(spreadsheet);
-            var response = await request.ExecuteAsync();
-            return response.SpreadsheetId;
-        }
-        #endregion Sheets API
-
-        #region Calendar API
-        private CalendarService GetCalendarService(UserCredential credential)
-        {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            // Define a service to make requests to the google api
-            var calendarService = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = clientID
-            });
-            return calendarService;
-        }
-
-        private async Task<string> CreateCalendar(CalendarService calendarService, string calendarName)
-        {
-            // Create a calendar
-            var calendar = new Google.Apis.Calendar.v3.Data.Calendar()
-            {
-                Summary = calendarName
-            };
-            var request = calendarService.Calendars.Insert(calendar);
-            var response = await request.ExecuteAsync();
-            return response.Id;
-        }
-
-        private async Task<string> CreateEvent(CalendarService calendarService, string calendarId, string eventName, DateTime eventStart, DateTime eventEnd)
-        {
-            // Create an event
-            var newEvent = new Google.Apis.Calendar.v3.Data.Event()
-            {
-                Summary = eventName,
-                Start = new EventDateTime()
-                {
-                    DateTime = eventStart,
-                    TimeZone = "Europe/Paris"
-                },
-                End = new EventDateTime()
-                {
-                    DateTime = eventEnd,
-                    TimeZone = "Europe/Paris"
-                }
-            };
-            var request = calendarService.Events.Insert(newEvent, calendarId);
-            var response = await request.ExecuteAsync();
-            return response.Id;
-        }
-
-        // get calendar events
-        private async Task<List<Google.Apis.Calendar.v3.Data.Event>> GetEvents(CalendarService calendarService, string calendarId)
-        {
-            // Create an event
-            var request = calendarService.Events.List(calendarId);
-            var response = await request.ExecuteAsync();
-            return response.Items.ToList();
-        }
-        #endregion Calendar API
     }
 }
