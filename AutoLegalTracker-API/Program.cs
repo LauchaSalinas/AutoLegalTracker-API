@@ -1,8 +1,6 @@
-using AutoLegalTracker_API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz.Impl;
-using Microsoft.OpenApi.Models;
 
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
@@ -29,13 +27,21 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<UserBusiness>();
             builder.Services.AddTransient<WeatherForecastBusiness>();
             builder.Services.AddTransient<EmailBusiness>();
+            builder.Services.AddTransient<CalendarBusiness>();
+            builder.Services.AddTransient<MedicalAppointmentBusiness>();
+
+
             // Add dependency injection to the Services Layer
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<GoogleOAuth2Service>();
+            builder.Services.AddScoped<GoogleCalendarService>();
+            builder.Services.AddScoped<GoogleDriveService>();
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
             builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
+            builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
+            builder.Services.AddScoped<IDataAccesssAsync<Calendar>, DataAccessAsync<Calendar>>();
 
 
             builder.Services.AddSingleton(provider =>
