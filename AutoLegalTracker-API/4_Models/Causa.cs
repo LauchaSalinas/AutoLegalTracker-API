@@ -1,40 +1,67 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 namespace AutoLegalTracker_API.Models
 {
     public class Causa
     {
         
-        public List<ITramite> _tramiteList = new();
+        public List<ITramite> TramiteList = new();
 
-        public string caratula { get; set; }
-        public uint numDeCausa { get; set; }
-        public string juzgado { get; set; }
-        public string url { get; set; }
+        public string Caratula { get; set; }
+        public uint NumDeCausa { get; set; }
+        public string Juzgado { get; set; }
+        public string Url { get; set; }
 
+        public Causa()
+        {
+            this.Caratula = string.Empty;
+            this.NumDeCausa = 0;
+            this.Juzgado = string.Empty;
+            this.Url = string.Empty;
+        }
     }
 
     public abstract class ITramite
     {
 
-        public string hipervinculo { get; set; }
-        public string parrafo { get; set; }
+        public string Hipervinculo { get; set; }
+        public string Parrafo { get; set; }
 
     }
 
     public class Notificacion : ITramite
     {
-        public string tipo { get; set; }
+        public Notificacion()
+        {
+            Hipervinculo = string.Empty;
+            Parrafo = string.Empty;
+            Tipo = string.Empty;
+        }
+        public string Tipo { get; set; }
     }
 
     public class Presentacion : ITramite
     {
-        public string titulo { get; set; }
-        public string tipo { get; set; }
+        public Presentacion()
+        {
+            Hipervinculo = string.Empty;
+            Parrafo = string.Empty;
+            Tipo = string.Empty;
+            Titulo = string.Empty;
+        }
+        public string Titulo { get; set; }
+        public string Tipo { get; set; }
     }
 
     public class Tramite : ITramite
     {
-        public string observacion { get; set; }
+        public Tramite()
+        {
+            Hipervinculo = string.Empty;
+            Parrafo = string.Empty;
+            Observacion = string.Empty;
+        }
+        public string Observacion { get; set; }
     }
 
 }

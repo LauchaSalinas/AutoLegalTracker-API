@@ -5,11 +5,13 @@ namespace AutoLegalTracker_API._5_WebServices
 {
     public class PuppeteerService
     {
-
+        private IPage _page;
+        private IBrowser _browser;
+        
 
         #region Public Methods
 
-        public async Task<IPage?> inicializeService()
+        public async Task<IPage?> InicializeService()
         {
             var options = new LaunchOptions
             {
@@ -21,26 +23,26 @@ namespace AutoLegalTracker_API._5_WebServices
             using var browserFetcher = new BrowserFetcher();
             await browserFetcher.DownloadAsync();
 
-            IPage page; 
+            
 
-            using (var browser = await Puppeteer.LaunchAsync(options))
+            _browser = await Puppeteer.LaunchAsync(options);
+            
+            _page = await _browser.NewPageAsync();
+            await _page.SetViewportAsync(new ViewPortOptions
             {
-                page = await browser.NewPageAsync();
-                await page.SetViewportAsync(new ViewPortOptions
-                {
-                    Width = 1920,
-                    Height = 1080
-                });
-            }
+                Width = 1920,
+                Height = 1080
+            });
+            
 
-            if(page != null)
+            if(_page != null)
             {
-                return page;
+                return _page;
             }
             return null;
         }
 
-        public async Task<IPage?> logeoService(IPage page, string url, string selectorUsuario, string selectorContra, string usuario, string contra, string selectorEntrar)
+        public async Task<IPage?> LogIn(IPage page, string url, string selectorUsuario, string selectorContra, string usuario, string contra, string selectorEntrar)
         {
             Console.WriteLine("Loggin in");
             await page.GoToAsync(url);
@@ -57,7 +59,7 @@ namespace AutoLegalTracker_API._5_WebServices
             return null;
         }
 
-        public async Task<IPage?> clickeoService(IPage page, string selector, string selectorParaConfirmacion)
+        public async Task<IPage?> ClickSelector(IPage page, string selector, string selectorParaConfirmacion)
         {
             await page.ClickAsync(selector);
             await page.WaitForTimeoutAsync(3000); // delete this later
@@ -69,7 +71,7 @@ namespace AutoLegalTracker_API._5_WebServices
             return null;
         }
 
-        public async Task<string[]> stringsService(IPage page, string functionJS)
+        public async Task<string[]> GetStringArray(IPage page, string functionJS)
         {
             var result = await page.EvaluateFunctionAsync(functionJS);
             List<string> list = new();
@@ -80,9 +82,9 @@ namespace AutoLegalTracker_API._5_WebServices
             return list.ToArray();
         }
 
-        public async Task<IPage> irService(IPage page, string url)
+        public async Task<IPage> GoToUrl(IPage page, string url)
         {
-            await page.ClickAsync(url);
+            await page.GoToAsync(url);
             if (page != null)
             {
                 return page;
@@ -90,7 +92,7 @@ namespace AutoLegalTracker_API._5_WebServices
             return null;
         }
 
-        public async Task<uint> innerUintService(IPage page, string selector)
+        public async Task<uint> GetNumberWithSelector(IPage page, string selector)
         {
             var res = await page.QuerySelectorAsync(selector);
             if(res != null)
@@ -101,24 +103,24 @@ namespace AutoLegalTracker_API._5_WebServices
             }
             return 0;
         }
-        public async Task<string> innerStringService(IPage page, string selector)
+        public async Task<string> GetTextWithSelector(IPage page, string selector)
         {
             var res = await page.QuerySelectorAsync(selector);
             if (res != null)
             {
-                var jsHandle = await res.GetPropertyAsync("innerHTML");
+                var jsHandle = await res.GetPropertyAsync("innerText");
                 var inner = await jsHandle.JsonValueAsync<string>();
                 return inner;
             }
             return " ";
         }
 
-        public async Task<string> innerStringService(IPage page, string selector, int pos)
+        public async Task<string> GetTextWithSelector(IPage page, string selector, int pos)
         {
             var res = await page.QuerySelectorAllAsync(selector);
             if (res != null)
             {
-                var jsHandle = await res[pos].GetPropertyAsync("innerHTML");
+                var jsHandle = await res[pos].GetPropertyAsync("innerText");
                 var inner = await jsHandle.JsonValueAsync<string>();
                 return inner;
             }
