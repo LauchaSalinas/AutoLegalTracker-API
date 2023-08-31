@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AutoLegalTracker_API._3_DataAccess.Migrations
+namespace AutoLegalTracker_API.DataAccess.Migrations
 {
     [DbContext(typeof(ALTContext))]
     [Migration("20230820235807_2_adding_user_to_context2")]

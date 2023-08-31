@@ -41,7 +41,7 @@ namespace AutoLegalTracker_API.Controllers
                 var result = await _medicalAppointmentBusiness.GetEvents(user, calendarId, startDate, endDate);
 
                 // parse the result to a json object
-                // TODO create a class to parse the result and map from google CalendarEvent to MedicalAppointment
+                // TODO LSalinas: create a class to parse the result and map from google CalendarEvent to MedicalAppointment
                 var jsonResult = JsonConvert.SerializeObject(result);
 
                 return new OkObjectResult(jsonResult);

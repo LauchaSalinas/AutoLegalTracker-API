@@ -119,7 +119,7 @@ namespace AutoLegalTracker_API.WebServices
                 IdToken = tokenId,
             };
             // check if the token is expired
-            // TODO is saying its expired when it's not, need to check this
+            // TODO LSalinas/JGonzalez is saying its expired when it's not, need to check this
             if (token.IsExpired(SystemClock.Default))
             {
                 // if the token is expired, refresh it

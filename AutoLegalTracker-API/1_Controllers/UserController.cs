@@ -135,7 +135,7 @@ namespace ALTDeployTest.Controllers
         [HttpGet("Info")]
         public ActionResult Info()
         {
-            // TODO : Get user info from database instead of cookie
+            // TODO SOtero: Get user info from database instead of cookie
             var name = HttpContext.User.FindFirst(ClaimTypes.GivenName)?.Value.ToString();
             var imageUrl = HttpContext.User.FindFirst("ImageUrl")?.Value.ToString();
 

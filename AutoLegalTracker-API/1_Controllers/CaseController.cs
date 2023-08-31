@@ -16,13 +16,13 @@ namespace AutoLegalTracker_API._1_Controllers
 
         private IConfiguration _configuration;
         private UserBusiness _userBusiness;
-        private JwtBusiness _jwtBusiness;
+        private CaseBusiness _caseBusiness;
 
-        public CaseController(IConfiguration configuration, UserBusiness userBusiness, JwtBusiness jwtBusiness)
+        public CaseController(IConfiguration configuration, UserBusiness userBusiness, CaseBusiness caseBusiness)
         {
             _configuration = configuration;
             _userBusiness = userBusiness;
-            _jwtBusiness = jwtBusiness;
+            _caseBusiness = caseBusiness;
         }
 
         #endregion Constructor
@@ -49,13 +49,9 @@ namespace AutoLegalTracker_API._1_Controllers
                 // QUE HACE EL BUSINESS?
                 // 1. TIENE NOMBRE DE PROCESO DE NEGOCIO
                 // 2. CONTACTA SERVICIOS Y DATA ACCESS PARA DEVOLVER UN RESULTADO
-                // TODO: Get cases from database from an user
-                // cases = await _caseBusiness.GetCases(user);
+                var cases = await _caseBusiness.GetCases(user);
 
-                // TODO: delete when cases are ready
-                IEnumerable<LegalCase> cases = new List<LegalCase>();
-
-                return new OkObjectResult(new { cases = cases });
+                return new OkObjectResult(new { cases });
             }
             catch (ApplicationException appex)
             {
@@ -69,7 +65,40 @@ namespace AutoLegalTracker_API._1_Controllers
                 return BadRequest(new { error = errorMsg });
             }
 
-            #endregion Public Methods
+            
         }
+        [Authorize]
+        [HttpGet("GetDashboardStatistics")]
+        public async Task<ActionResult> GetDashboardStatistics()
+        {
+            User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
+            if (user == null)
+                return new BadRequestObjectResult(new { error = "User error" });
+
+            try
+            {
+                var automatedCases = await _caseBusiness.GetAutomatedCases(user);
+                var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
+
+                var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
+                var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
+
+                // TODO JGonzalez: seguir desde aca y revisar lo hecho previamente, revisar que los modelos se agreguen al contexto y revisar la inyeccion de dependencias
+
+                return new OkObjectResult( new { automated, pendingEvents } );
+            }
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
+        }
+        #endregion Public Methods
     }
 }
