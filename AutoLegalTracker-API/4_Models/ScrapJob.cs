@@ -13,7 +13,7 @@ public class ScrapJob : IJob
         CasoBLL caso = new(puppeteer);
         try
         {
-            await caso.checkNewCases();
+            await caso.CheckNewCases();
         }
         catch (Exception ex)
         {
