@@ -6,8 +6,8 @@ using Quartz.Impl;
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
-
-
+using AutoLegalTracker_API._2_Business;
+using AutoLegalTracker_API._5_WebServices;
 
 namespace AutoLegalTracker_API
 {
@@ -26,8 +26,10 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<UserBusiness>();
             builder.Services.AddTransient<WeatherForecastBLL>();
             builder.Services.AddTransient<EmailBLL>();
+            builder.Services.AddTransient<CasoBLL>();
             // Add dependency injection to the Services Layer
             builder.Services.AddTransient<EmailService>();
+            builder.Services.AddTransient<PuppeteerService>();
             // TODO Add dependency injection to the Data Access Layer
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<Email>, DataAccessAsync<Email>>();
@@ -39,10 +41,11 @@ namespace AutoLegalTracker_API
                 var schedulerFactory = new StdSchedulerFactory();
                 return schedulerFactory.GetScheduler().Result;
             });
-
+            
+      
             // Add Quartz scheduler service
             builder.Services.AddSingleton<CronService>();
-
+            builder.Configuration.AddJsonFile("scrapSettings.json");
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
                 builder.Services.AddSwaggerGen();
@@ -98,7 +101,7 @@ namespace AutoLegalTracker_API
             {
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
 
-                Context.Database.Migrate();
+                // Context.Database.Migrate();
 
                 // Start Quartz scheduler
                 var quartzService = scope.ServiceProvider.GetRequiredService<CronService>();

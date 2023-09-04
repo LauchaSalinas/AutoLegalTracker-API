@@ -5,88 +5,71 @@ using AutoLegalTracker_API.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.Extensions.Configuration;
 using PuppeteerSharp;
 using System.Drawing.Text;
+using System.Text;
 
 namespace AutoLegalTracker_API._2_Business
 {
     public class CasoBLL
     {
-        private readonly PuppeteerService _puppeteerService;
-
         #region Constructor
-        public CasoBLL(PuppeteerService puppeteerService)
+        private readonly PuppeteerService _puppeteerService;
+        private readonly IConfiguration _configuration;
+        
+        public CasoBLL(PuppeteerService puppeteerService, IConfiguration configuration)
         {
             _puppeteerService = puppeteerService;
+            _configuration = configuration;
         }
         #endregion Constructor
 
         #region Public Methods
         public async Task CheckNewCases()
         {
-            await _puppeteerService.InicializeService();
-            var controlador = await _puppeteerService.LogIn("http://localhost:7000", "#txtDomicilioElectronico",
-                "#txtpass", "20289537679@cme.notificaciones", "YourStrong(!)Password", "#cmdentrar");
-
-            if (controlador)
-            {
-                controlador = await _puppeteerService.GoToUrl(
-                    await _puppeteerService.GetPropertyWithSelector(".nav.navbar-nav li a", "href", 7));
-
-                if (controlador)
-                {
-                    controlador = await _puppeteerService.ClickSelector(
-                     ".btn.btn-info.center-block.boton100.letrablanca", ".btn.btn-sm.btn-success.boton100");
-
-                    if (controlador)
+            try{
+                await _puppeteerService.InicializeService();
+                
+                var controlador = await _puppeteerService.LogIn(_configuration["urlDeLaPaginaLocalhost"], _configuration["selectorInputUsuario"], _configuration["selectorInputContraseña"], _configuration["contenidoInputUsuario"], _configuration["contenidoInputContraseña"], _configuration["selectorBotonIngresar"]);
+                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                controlador = await _puppeteerService.GoToUrl(await _puppeteerService.GetPropertyWithSelector(_configuration["selectorMisCausas"], _configuration["propiedadHipervinculo"], int.Parse(_configuration["posicionMisCausas"])));
+                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                await _puppeteerService.ClickSelector(_configuration["selectorBotonMostrarTodasLasCausas"], _configuration["selectorObjetoConfirmacion"]);
+                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                var result = await _puppeteerService.GetStringArray(_configuration["funcionParaStringArrayObtenerHrefCasos"]);
+                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                foreach(var causa in LlenarListaDeCausas(result))
                     {
-                        var result = await _puppeteerService.GetStringArray("()=>{"
-                            + "const a = document.querySelectorAll('.btn.btn-sm.btn-success.boton100');"
-                            + "const res=[];"
-                            + "for(let i=0; i<a.length; i++)"
-                            + "    res.push(a[i].href);"
-                            + "return res;"
-                            + "}");
-
-                        foreach(var causa in LlenarListaDeCausas(result))
+                        await _puppeteerService.GoToUrl(causa.Url);
+                        await CargarCausa(causa);
+                        await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                        var r = await _puppeteerService.GetStringArray(_configuration["funcionParaStringArrayObtenerHrefItramites"]);
+                        foreach (var a in r)
                         {
-                            await _puppeteerService.GoToUrl(causa.Url);
-                            await CargarCausa(causa);
-                          
-                            var r = await _puppeteerService.GetStringArray("()=>{" +
-                                "const a = document.querySelectorAll('.btn.btn-xs.btn-success');" +
-                                "const res=[];" +
-                                "for(let i=0; i<a.length; i++)" +
-                                "    res.push(a[i].href);" +
-                                "return res;" +
-                                "}");
-
-                            foreach (var a in r)
-                            {
-                                AgregarTramiteALista(causa, a);
-                            }
-
-                            foreach(ITramite i in causa.TramiteList)
-                            {
-                                await _puppeteerService.GoToUrl(i.Hipervinculo);
-                                await CargarTramite(i);
-                                Console.ReadLine();
-                            }
-
+                            AgregarTramiteALista(causa, a);
                         }
+
+                        foreach(ITramite i in causa.TramiteList)
+                        {
+                            await _puppeteerService.GoToUrl(i.Hipervinculo);
+                            await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                            await CargarTramite(i);
+                            Console.ReadLine();
+                        }
+
                     }
-                    Console.WriteLine("Error en clickeo.");
-                }
-                Console.WriteLine("Error en clickeo.");
             }
-            Console.WriteLine("Error de logeo.");
+            catch(Exception e){
+                Console.WriteLine(e.Message);
+            }
         }
 
         public async Task CargarCausa(Causa causa)
         {
-            causa.NumDeCausa = await _puppeteerService.GetNumberWithSelector("#numeroCausa");
-            causa.Caratula = await _puppeteerService.GetPropertyWithSelector("#caratula", "innerText");
-            causa.Juzgado = await _puppeteerService.GetPropertyWithSelector("#organismo", "innerText");
+            causa.NumDeCausa = await _puppeteerService.GetNumberWithSelector(_configuration["selectorNumeroCausa"]);
+            causa.Caratula = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorCaratula"], _configuration["propiedadTexto"]);
+            causa.Juzgado = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorOrganismo"], _configuration["propiedadTexto"]);
         }
 
         public void AgregarTramiteALista(Causa causa, string a)
@@ -129,10 +112,10 @@ namespace AutoLegalTracker_API._2_Business
                 case Notificacion notificacion:
 
                     notificacion.Tipo = await _puppeteerService.GetPropertyWithSelector(
-                        "#ctl00_cph_ucTextoNotificacion_lblTipoNotificacion", "innerText");
+                        _configuration["selectorTipoNotificacion"], _configuration["propiedadTexto"]);
 
                     notificacion.Parrafo = await _puppeteerService.GetPropertyWithSelector(
-                        "#textoNotificacion table", "innerText", 1);
+                        _configuration["selectorTextoNotificacion"], _configuration["propiedadTexto"], int.Parse(_configuration["posicionTextoNotificacionYPresentacion"]));
 
                     Console.WriteLine("Este tramite es notificacion de tipo {0}." +
                         "\nSu texto es: {1}", notificacion.Tipo, notificacion.Parrafo);
@@ -140,12 +123,12 @@ namespace AutoLegalTracker_API._2_Business
 
                 case Presentacion presentacion:
 
-                    presentacion.Titulo = await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblDetalle", "innerText");
+                    presentacion.Titulo = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorTituloPresentacion"], _configuration["propiedadTexto"]);
 
-                    presentacion.Tipo = await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblTipo", "innerText");
+                    presentacion.Tipo = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorTipoPresentacion"], _configuration["propiedadTexto"]);
 
                     presentacion.Parrafo = await _puppeteerService.GetPropertyWithSelector(
-                        "#textoPresentacion table", "innerText", 1);
+                        _configuration["selectorTextoPresentacion"], _configuration["propiedadTexto"], int.Parse(_configuration["posicionTextoNotificacionYPresentacion"]));
 
                     Console.WriteLine("Este tramite es presentacion de tipo {0}, con titulo {1}" +
                         "\nTexto: {2}",
@@ -155,7 +138,7 @@ namespace AutoLegalTracker_API._2_Business
                 case Tramite tramite:
 
                     tramite.Parrafo = await _puppeteerService.GetPropertyWithSelector(
-                        "#listaNovedades table", "innerText", 2);
+                        _configuration["selectorTextoTramite"], _configuration["propiedadTexto"], int.Parse(_configuration["posicionTextoTramite"]));
 
                     Console.WriteLine("Este es un tramite." +
                         "\nTexto: {0}", tramite.Parrafo);
@@ -177,6 +160,7 @@ namespace AutoLegalTracker_API._2_Business
             return causas;
         }
 
+        
         #endregion Public Methods
     }
 }

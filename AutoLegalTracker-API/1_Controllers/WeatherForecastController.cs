@@ -5,6 +5,7 @@ using AutoLegalTracker_API.Services;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AutoLegalTracker_API.Controllers
 {
@@ -15,13 +16,14 @@ namespace AutoLegalTracker_API.Controllers
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly WeatherForecastBLL _weatherForecastBLL;
         private readonly EmailBLL _email;
+        private readonly IConfiguration _configuration;
 
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL, EmailBLL mail)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBLL weatherForecastBLL, EmailBLL mail, IConfiguration configuration)
         {
             _email = mail;
             _logger = logger;
             _weatherForecastBLL = weatherForecastBLL;
+            _configuration = configuration;
         }
         //[HttpGet(Name = "GetWeatherForecast")]
         //public async Task<IEnumerable<WeatherForecast>> Get()
