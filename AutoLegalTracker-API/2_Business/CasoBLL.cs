@@ -11,9 +11,24 @@ namespace AutoLegalTracker_API._2_Business
 {
     public class CasoBLL
     {
-        private readonly PuppeteerService _puppeteerService;
-
         #region Constructor
+        private readonly PuppeteerService _puppeteerService;
+        private readonly int timeout = 5000;
+        private readonly string funcionParaStringArrayObtenerHrefCasos = "() => {" +
+            "const a = document.querySelectorAll('.btn.btn-sm.btn-success.boton100');" +
+            "const res = [];" +
+            "for(let i=0; i<a.length; i++)" +
+            "    res.push(a[i].href);" +
+            "return res;" +
+            "}";
+        private readonly string funcionParaStringArrayObtenerHrefItramites = "()=>{" +
+            "const a = document.querySelectorAll('.btn.btn-xs.btn-success');" +
+            "const res=[];" +
+            "for(let i=0; i<a.length; i++)" +
+            "    res.push(a[i].href);" +
+            "return res;" +
+            "}";
+
         public CasoBLL(PuppeteerService puppeteerService)
         {
             _puppeteerService = puppeteerService;
@@ -23,62 +38,41 @@ namespace AutoLegalTracker_API._2_Business
         #region Public Methods
         public async Task CheckNewCases()
         {
-            await _puppeteerService.InicializeService();
-            var controlador = await _puppeteerService.LogIn("http://localhost:7000", "#txtDomicilioElectronico",
-                "#txtpass", "20289537679@cme.notificaciones", "YourStrong(!)Password", "#cmdentrar");
-
-            if (controlador)
-            {
-                controlador = await _puppeteerService.ClickSelector("#misCausas",
-                    ".btn.btn-info.center-block.boton100.letrablanca");
-
-                if (controlador)
-                {
-                    controlador = await _puppeteerService.ClickSelector(
-                     ".btn.btn-info.center-block.boton100.letrablanca", ".btn.btn-sm.btn-success.boton100");
-
-                    if (controlador)
+            try{
+                await _puppeteerService.InicializeService();
+                
+                var controlador = await _puppeteerService.LogIn("http://localhost:7000", "#txtDomicilioElectronico", "#txtpass", "20289537679@cme.notificaciones", "YourStrong(!)Password", "#cmdentrar");
+                await _puppeteerService.Wait(timeout);
+                controlador = await _puppeteerService.ClickSelector("#misCausas", ".btn.btn-info.center-block.boton100.letrablanca");
+                await _puppeteerService.Wait(timeout);
+                await _puppeteerService.ClickSelector(".btn.btn-info.center-block.boton100.letrablanca", ".btn.btn-sm.btn-success.boton100");
+                await _puppeteerService.Wait(timeout);
+                var result = await _puppeteerService.GetStringArray(funcionParaStringArrayObtenerHrefCasos);
+                await _puppeteerService.Wait(timeout);
+                foreach(var causa in LlenarListaDeCausas(result))
                     {
-                        var result = await _puppeteerService.GetStringArray("()=>{"
-                            + "const a = document.querySelectorAll('.btn.btn-sm.btn-success.boton100');"
-                            + "const res=[];"
-                            + "for(let i=0; i<a.length; i++)"
-                            + "    res.push(a[i].href);"
-                            + "return res;"
-                            + "}");
-
-                        foreach(var causa in LlenarListaDeCausas(result))
+                        await _puppeteerService.GoToUrl(causa.Url);
+                        await CargarCausa(causa);
+                        await _puppeteerService.Wait(1000);
+                        var r = await _puppeteerService.GetStringArray(funcionParaStringArrayObtenerHrefItramites);
+                        foreach (var a in r)
                         {
-                            await _puppeteerService.GoToUrl(causa.Url);
-                            await CargarCausa(causa);
-                          
-                            var r = await _puppeteerService.GetStringArray("()=>{" +
-                                "const a = document.querySelectorAll('.btn.btn-xs.btn-success');" +
-                                "const res=[];" +
-                                "for(let i=0; i<a.length; i++)" +
-                                "    res.push(a[i].href);" +
-                                "return res;" +
-                                "}");
-
-                            foreach (var a in r)
-                            {
-                                AgregarTramiteALista(causa, a);
-                            }
-
-                            foreach(ITramite i in causa.TramiteList)
-                            {
-                                await _puppeteerService.GoToUrl(i.Hipervinculo);
-                                await CargarTramite(i);
-                                Console.ReadLine();
-                            }
-
+                            AgregarTramiteALista(causa, a);
                         }
+
+                        foreach(ITramite i in causa.TramiteList)
+                        {
+                            await _puppeteerService.GoToUrl(i.Hipervinculo);
+                            await _puppeteerService.Wait(timeout);
+                            await CargarTramite(i);
+                            Console.ReadLine();
+                        }
+
                     }
-                    Console.WriteLine("Error en clickeo.");
-                }
-                Console.WriteLine("Error en clickeo.");
             }
-            Console.WriteLine("Error de logeo.");
+            catch(Exception e){
+                Console.WriteLine(e.Message);
+            }
         }
 
         public async Task CargarCausa(Causa causa)
@@ -176,6 +170,7 @@ namespace AutoLegalTracker_API._2_Business
             return causas;
         }
 
+        
         #endregion Public Methods
     }
 }
