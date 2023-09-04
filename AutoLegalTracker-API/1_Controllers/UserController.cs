@@ -47,6 +47,8 @@ namespace ALTDeployTest.Controllers
                 var returnToken = _jwtBusiness.CreateJwt(user);
 
                 // Create an HttpOnly cookie to store the token
+                // TODO SOtero: Change the domain to the one in the config file
+                // TODO SOtero: Make the Days to expire a config value
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,

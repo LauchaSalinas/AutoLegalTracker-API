@@ -29,7 +29,7 @@ namespace AutoLegalTracker_API.WebServices
 
         public GoogleOAuth2Service Set(User user)
         {
-            var tokenResponse = GetTokenResponse(user.GoogleOAuth2AccessToken, user.GoogleOAuth2RefreshToken, user.GoogleOAuth2IdToken);
+            var tokenResponse = GetTokenResponse(user.GoogleOAuth2AccessToken, user.GoogleOAuth2RefreshToken, user.GoogleOAuth2IdToken, user.GoogleOAuth2TokenCreatedAt, user.GoogleOAuth2TokenExpiration);
             _credential = GetUserCredential(_flow, tokenResponse);
             return this;
         }
@@ -110,13 +110,15 @@ namespace AutoLegalTracker_API.WebServices
             }.ExecuteAsync(new HttpClient(), GoogleAuthConsts.OidcTokenUrl, CancellationToken.None, SystemClock.Default);
             return tokenResponse;
         }
-        private TokenResponse GetTokenResponse(string accessToken, string refreshToken, string tokenId)
+        private TokenResponse GetTokenResponse(string accessToken, string refreshToken, string tokenId, DateTime issuedAt, long expiresInSeconds)
         {
             var token = new TokenResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 IdToken = tokenId,
+                IssuedUtc = issuedAt,
+                ExpiresInSeconds = expiresInSeconds
             };
             // check if the token is expired
             // TODO LSalinas/JGonzalez is saying its expired when it's not, need to check this

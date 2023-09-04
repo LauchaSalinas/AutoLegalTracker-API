@@ -21,7 +21,7 @@ namespace AutoLegalTracker_API.DataAccess
                 DateTime nextWeekEnd = nextWeekStart.AddDays(7);
 
                 var casesWithPendingEvents = await _context.Set<LegalCase>()
-                    .Where(legalCase => legalCase.userId == user.Id)
+                    .Where(legalCase => legalCase.UserId == user.Id)
                     .Include(legalCase => legalCase.LegalNotifications.Select(notification =>
                         notification.MedicalAppointments.Where(appointment =>
                             appointment.StartDate >= nextWeekStart && appointment.StartDate < nextWeekEnd)))

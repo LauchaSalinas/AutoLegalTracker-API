@@ -5,6 +5,9 @@ using AutoLegalTracker_API.Services;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace AutoLegalTracker_API.Controllers
 {
@@ -15,6 +18,7 @@ namespace AutoLegalTracker_API.Controllers
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly WeatherForecastBusiness _weatherForecastBLL;
         private readonly EmailBusiness _email;
+        private readonly ALTContext _context;
 
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBusiness weatherForecastBLL, EmailBusiness mail)
@@ -22,6 +26,7 @@ namespace AutoLegalTracker_API.Controllers
             _email = mail;
             _logger = logger;
             _weatherForecastBLL = weatherForecastBLL;
+            _context = context;
         }
         //[HttpGet(Name = "GetWeatherForecast")]
         //public async Task<IEnumerable<WeatherForecast>> Get()
@@ -101,6 +106,94 @@ namespace AutoLegalTracker_API.Controllers
                 // Return a custom application error
                 return BadRequest("An error occurred while deleting the weather forecast.");
             }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+
+            // create a user
+            var user = new User
+            {
+                Sub = "user123", // Example value for Sub
+                Name = "Juan",
+                FamilyName = "Gonzalez",
+                Email = "juan@example.com",
+                GoogleProfilePicture = "https://example.com/juan_profile.jpg",
+                WebCredentialUser = "web_user", // Example value for WebCredentialUser
+                WebCredentialPassword = "web_password", // Example value for WebCredentialPassword
+                GoogleOAuth2RefreshToken = "refresh_token", // Example value for GoogleOAuth2RefreshToken
+                GoogleOAuth2AccessToken = "access_token", // Example value for GoogleOAuth2AccessToken
+                GoogleOAuth2TokenExpiration = 1234567890, // Example value for GoogleOAuth2TokenExpiration
+                GoogleOAuth2TokenCreatedAt = DateTime.UtcNow, // Current UTC time as an example
+                GoogleOAuth2IdToken = "id_token", // Example value for GoogleOAuth2IdToken
+                LegalCases = new List<LegalCase>() // You can initialize this if needed
+            };
+
+            // create a LegalCase
+            var legalCase = new LegalCase
+            {
+                Caption = "Caso 1",
+                Description = "Caso 1",
+                CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
+                User = user, // Assign the User navigation property
+                Jurisdiction = "Example Jurisdiction", // Example value for Jurisdiction
+                CaseNumber = "123ABC", // Example value for CaseNumber
+            };
+            user.LegalCases.Add(legalCase);
+
+            // create a LegalAutomation
+            var legalAutomation = new LegalAutomation
+            {
+                Name = "Automatizacion 1",
+                Description = "Automatizacion 1",
+            };
+
+            // create a LegalNotification
+            var legalNotification = new LegalNotification
+            {
+                Title = "Notificacion 1",
+                Description = "Notificacion 1",
+                LegalCase = legalCase,
+                LegalAutomation = legalAutomation
+            };
+
+            legalAutomation.LegalNotifications.Add(legalNotification);
+
+            // create a MedicalAppointment
+            var medicalAppointment = new MedicalAppointment
+            {
+                Name = "Cita 1",
+                Description = "Cita 1",
+                LegalNotification = legalNotification
+            };
+
+            // store it in the database
+            _context.Users.Add(user);
+
+            _context.SaveChanges();
+            return Ok("Test");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("test2")]
+        public IActionResult Test2()
+        {
+            // get every case of every user
+            var users = _context.Users.Include(u => u.LegalCases).ToList();
+            return Ok("Test");
+
+
+            //Use Projection(Select) to Shape Data:
+            //Sometimes you might not need all the properties of related entities.In such cases, you can use projection to retrieve only the required data.
+            //var usersWithCaseNames = dbContext.Users
+            //    .Select(u => new
+            //    {
+            //        u.Name,
+            //        LegalCaseNames = u.LegalCases.Select(c => c.Name)
+            //    })
+            //    .ToList();
         }
     }
 }

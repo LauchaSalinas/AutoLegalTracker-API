@@ -13,9 +13,11 @@ namespace AutoLegalTracker_API.Models
 		public string? WebCredentialPassword { get; set; }
 		public string GoogleOAuth2RefreshToken { get; set; }
 		public string GoogleOAuth2AccessToken { get; set; }
-		public long? GoogleOAuth2TokenExpiration { get; set; }
+		public long GoogleOAuth2TokenExpiration { get; set; }
 		public DateTime GoogleOAuth2TokenCreatedAt { get; set; }
 		public string? GoogleOAuth2IdToken { get; set; }
+
+		public virtual List<LegalCase> LegalCases { get; set; } = new List<LegalCase>();
     }
 }
 

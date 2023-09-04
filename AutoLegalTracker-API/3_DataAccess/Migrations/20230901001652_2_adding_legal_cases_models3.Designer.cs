@@ -4,16 +4,18 @@ using AutoLegalTracker_API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AutoLegalTracker_API.Migrations
+namespace AutoLegalTracker_API.DataAccess.Migrations
 {
     [DbContext(typeof(ALTContext))]
-    partial class ALTContextModelSnapshot : ModelSnapshot
+    [Migration("20230901001652_2_adding_legal_cases_models3")]
+    partial class _2_adding_legal_cases_models3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

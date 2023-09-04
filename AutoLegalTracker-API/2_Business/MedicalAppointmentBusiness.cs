@@ -43,5 +43,51 @@ namespace AutoLegalTracker_API.Business
             return events;
         }
         #endregion Public Methods
+
+        #region MedicalAppointmentAssignation Methods
+
+        // THIS IS FROM COPILOT, DONT DELETE YET, USING AS A REFERENCE 
+        //public async Task<MedicalAppointment> AssignMedicalAppointment(User user, MedicalAppointment medicalAppointment)
+        //{
+        //    // get freebusy from calendar service
+        //    var freeBusy = await _googleCalendarService.Set(user).GetFreeBusy(medicalAppointment.CalendarId, medicalAppointment.StartDate, medicalAppointment.EndDate);
+
+        //    // check if freebusy is available
+        //    if (freeBusy != null && freeBusy.Calendars != null && freeBusy.Calendars.Count > 0)
+        //    {
+        //        // get calendar from freebusy
+        //        var calendar = freeBusy.Calendars[medicalAppointment.CalendarId];
+
+        //        // check if calendar is available
+        //        if (calendar != null && calendar.Busy != null && calendar.Busy.Count == 0)
+        //        {
+        //            // create event
+        //            var eventCreated = await _googleCalendarService.Set(user).CreateCalendarEvent(medicalAppointment.CalendarId, medicalAppointment.Title, medicalAppointment.Description, medicalAppointment.StartDate, medicalAppointment.EndDate);
+
+        //            // check if event was created
+        //            if (eventCreated != null)
+        //            {
+        //                // assign calendar event id to medical appointment
+        //                medicalAppointment.CalendarEventId = eventCreated.Id;
+
+        //                // save medical appointment
+        //                var medicalAppointmentSaved = await _medicalAppointmentAccess.Create(medicalAppointment);
+
+        //                // return medical appointment
+        //                return medicalAppointmentSaved;
+        //            }
+        //        }
+        //    }
+
+        //    // return null
+        //    return null;
+        //}
+
+        // Complete Cron MedAppments Job flow
+        // 1. Get all the LegalNotifications from the database
+        // 2. Check if the legal notification has an associated LegalAutomation
+
+
+        #endregion
     }
 }

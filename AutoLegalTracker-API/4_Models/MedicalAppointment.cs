@@ -12,6 +12,8 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool? PatientAttended { get; set; }
-        public int LegalNotification { get; set; }
+        public int LegalNotificationId { get; set; }
+
+        public virtual LegalNotification LegalNotification { get; set; } // Navigation property
     }
 }

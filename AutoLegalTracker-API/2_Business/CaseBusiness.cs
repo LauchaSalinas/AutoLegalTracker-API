@@ -26,7 +26,7 @@ namespace AutoLegalTracker_API.Business
         public async Task<List<LegalCase>> GetCases(User user)
         {
             // get cases from database
-            var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.userId == user.Id);
+            var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id);
 
             // return cases
             return cases.ToList();
@@ -35,7 +35,7 @@ namespace AutoLegalTracker_API.Business
         public async Task<List<LegalCase>> GetAutomatedCases(User user)
         {
             // get cases from database
-            var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.userId == user.Id && legalCase.ClosedAt == null);
+            var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id && legalCase.ClosedAt == null);
             return cases.ToList();
         }
 

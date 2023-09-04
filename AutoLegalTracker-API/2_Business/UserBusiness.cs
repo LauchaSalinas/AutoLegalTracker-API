@@ -52,9 +52,9 @@ namespace AutoLegalTracker_API.Business
                     WebCredentialPassword = null,
                     GoogleOAuth2AccessToken = credential.Token.AccessToken,
                     GoogleOAuth2RefreshToken = credential.Token.RefreshToken,
-                    GoogleOAuth2TokenExpiration = credential.Token.ExpiresInSeconds,
+                    GoogleOAuth2TokenExpiration = credential.Token.ExpiresInSeconds.GetValueOrDefault(),
                     GoogleOAuth2TokenCreatedAt = credential.Token.IssuedUtc,
-                    GoogleOAuth2IdToken = credential.Token.IdToken
+                    GoogleOAuth2IdToken = credential.Token.IdToken,
                 };
                 await _userAccess.Insert(user);
             }
