@@ -7,6 +7,10 @@ using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
+using Google.Apis.Sheets.v4.Data;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
+using System;
 
 namespace AutoLegalTracker_API
 {
@@ -135,10 +139,21 @@ namespace AutoLegalTracker_API
             app.UseCors(app => app.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();
+
+            // TODO Lsalinas: manage DI resources
+            // Use appropriate lifetime management: Depending on the nature of the dependency,
+            // you can manage its lifetime appropriately. For example, you can use a Singleton
+            // scope for a service that should be shared across the application, or you can use
+            // a Scoped scope for a service that should have a shorter lifespan(e.g., within a
+            // single HTTP request).By managing the lifetime correctly, you can avoid unnecessary
+            // resource allocation.
+
+            // Lazy initialization: If a dependency represents a resource that should be allocated
+            // only when needed, you can use lazy initialization.In C#, you can use Lazy<T> to
+            // achieve this. The resource will only be created when it's accessed for the first time.
         }
     }
 }
