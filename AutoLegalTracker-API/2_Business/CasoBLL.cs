@@ -2,6 +2,7 @@
 using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using PuppeteerSharp;
@@ -29,8 +30,8 @@ namespace AutoLegalTracker_API._2_Business
 
             if (controlador)
             {
-                controlador = await _puppeteerService.ClickSelector("#misCausas",
-                    ".btn.btn-info.center-block.boton100.letrablanca");
+                controlador = await _puppeteerService.GoToUrl(
+                    await _puppeteerService.GetPropertyWithSelector(".nav.navbar-nav li a", "href", 7));
 
                 if (controlador)
                 {
@@ -84,8 +85,8 @@ namespace AutoLegalTracker_API._2_Business
         public async Task CargarCausa(Causa causa)
         {
             causa.NumDeCausa = await _puppeteerService.GetNumberWithSelector("#numeroCausa");
-            causa.Caratula = await _puppeteerService.GetTextWithSelector("#caratula");
-            causa.Juzgado = await _puppeteerService.GetTextWithSelector("#organismo");
+            causa.Caratula = await _puppeteerService.GetPropertyWithSelector("#caratula", "innerText");
+            causa.Juzgado = await _puppeteerService.GetPropertyWithSelector("#organismo", "innerText");
         }
 
         public void AgregarTramiteALista(Causa causa, string a)
@@ -127,11 +128,11 @@ namespace AutoLegalTracker_API._2_Business
             {
                 case Notificacion notificacion:
 
-                    notificacion.Tipo = await _puppeteerService.GetTextWithSelector(
-                        "#ctl00_cph_ucTextoNotificacion_lblTipoNotificacion");
+                    notificacion.Tipo = await _puppeteerService.GetPropertyWithSelector(
+                        "#ctl00_cph_ucTextoNotificacion_lblTipoNotificacion", "innerText");
 
-                    notificacion.Parrafo = await _puppeteerService.GetTextWithSelector(
-                        "#textoNotificacion table", 1);
+                    notificacion.Parrafo = await _puppeteerService.GetPropertyWithSelector(
+                        "#textoNotificacion table", "innerText", 1);
 
                     Console.WriteLine("Este tramite es notificacion de tipo {0}." +
                         "\nSu texto es: {1}", notificacion.Tipo, notificacion.Parrafo);
@@ -139,12 +140,12 @@ namespace AutoLegalTracker_API._2_Business
 
                 case Presentacion presentacion:
 
-                    presentacion.Titulo = await _puppeteerService.GetTextWithSelector("#ctl00_cph_lblDetalle");
+                    presentacion.Titulo = await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblDetalle", "innerText");
 
-                    presentacion.Tipo = await _puppeteerService.GetTextWithSelector("#ctl00_cph_lblTipo");
+                    presentacion.Tipo = await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblTipo", "innerText");
 
-                    presentacion.Parrafo = await _puppeteerService.GetTextWithSelector(
-                        "#textoPresentacion table", 1);
+                    presentacion.Parrafo = await _puppeteerService.GetPropertyWithSelector(
+                        "#textoPresentacion table", "innerText", 1);
 
                     Console.WriteLine("Este tramite es presentacion de tipo {0}, con titulo {1}" +
                         "\nTexto: {2}",
@@ -153,8 +154,8 @@ namespace AutoLegalTracker_API._2_Business
 
                 case Tramite tramite:
 
-                    tramite.Parrafo = await _puppeteerService.GetTextWithSelector(
-                        "#listaNovedades table", 2);
+                    tramite.Parrafo = await _puppeteerService.GetPropertyWithSelector(
+                        "#listaNovedades table", "innerText", 2);
 
                     Console.WriteLine("Este es un tramite." +
                         "\nTexto: {0}", tramite.Parrafo);

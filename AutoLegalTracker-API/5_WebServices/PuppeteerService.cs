@@ -94,24 +94,24 @@ namespace AutoLegalTracker_API._5_WebServices
             }
             return 0;
         }
-        public async Task<string> GetTextWithSelector(string selector)
+        public async Task<string> GetPropertyWithSelector(string selector, string property)
         {
             var res = await _page.QuerySelectorAsync(selector);
             if (res != null)
             {
-                var jsHandle = await res.GetPropertyAsync("innerText");
+                var jsHandle = await res.GetPropertyAsync(property);
                 var inner = await jsHandle.JsonValueAsync<string>();
                 return inner;
             }
             return " ";
         }
 
-        public async Task<string> GetTextWithSelector(string selector, int pos)
+        public async Task<string> GetPropertyWithSelector(string selector, string property, int pos)
         {
             var res = await _page.QuerySelectorAllAsync(selector);
             if (res != null)
             {
-                var jsHandle = await res[pos].GetPropertyAsync("innerText");
+                var jsHandle = await res[pos].GetPropertyAsync(property);
                 var inner = await jsHandle.JsonValueAsync<string>();
                 return inner;
             }
