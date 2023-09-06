@@ -17,6 +17,7 @@ public class ScrapJob : IJob
     }
     public async Task Execute(IJobExecutionContext context)
     {
+        Console.WriteLine("MyJob executed at: " + DateTime.Now);
         // Your task implementation goes here
         try
         {
