@@ -1,4 +1,4 @@
-﻿using AutoLegalTracker_API._5_WebServices;
+﻿using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
@@ -10,7 +10,7 @@ using PuppeteerSharp;
 using System.Drawing.Text;
 using System.Text;
 
-namespace AutoLegalTracker_API._2_Business
+namespace AutoLegalTracker_API.Business
 {
     public class CasoBLL
     {

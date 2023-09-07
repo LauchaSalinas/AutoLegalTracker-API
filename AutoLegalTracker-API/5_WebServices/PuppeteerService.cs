@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using PuppeteerSharp;
 
-namespace AutoLegalTracker_API._5_WebServices
+namespace AutoLegalTracker_API.WebServices
 {
     public class PuppeteerService
     {

@@ -7,10 +7,7 @@ using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API._2_Business;
-using AutoLegalTracker_API._5_WebServices;
 using Quartz;
-using System.Globalization;
 
 namespace AutoLegalTracker_API
 {
