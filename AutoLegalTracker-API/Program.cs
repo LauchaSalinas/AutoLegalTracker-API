@@ -7,10 +7,7 @@ using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API._2_Business;
-using AutoLegalTracker_API._5_WebServices;
 using Quartz;
-using System.Globalization;
 
 namespace AutoLegalTracker_API
 {
@@ -35,7 +32,7 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
 
 
-            builder.Services.AddTransient<CasoBLL>();
+            builder.Services.AddTransient<ScrapBusiness>();
             builder.Services.AddTransient<ScrapJob>();
             // Add dependency injection to the Services Layer
             builder.Services.AddScoped<EmailService>();
@@ -151,7 +148,7 @@ namespace AutoLegalTracker_API
             {
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
 
-                // Context.Database.Migrate();
+                Context.Database.Migrate();
 
             }
             

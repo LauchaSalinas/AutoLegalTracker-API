@@ -1,24 +1,15 @@
-﻿using AutoLegalTracker_API._5_WebServices;
-using AutoLegalTracker_API.DataAccess;
+﻿using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.Models;
-using AutoLegalTracker_API.Services;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.Extensions.Configuration;
-using PuppeteerSharp;
-using System.Drawing.Text;
-using System.Text;
 
-namespace AutoLegalTracker_API._2_Business
+namespace AutoLegalTracker_API.Business
 {
-    public class CasoBLL
+    public class ScrapBusiness
     {
         #region Constructor
         private readonly PuppeteerService _puppeteerService;
         private readonly IConfiguration _configuration;
         
-        public CasoBLL(PuppeteerService puppeteerService, IConfiguration configuration)
+        public ScrapBusiness(PuppeteerService puppeteerService, IConfiguration configuration)
         {
             _puppeteerService = puppeteerService;
             _configuration = configuration;

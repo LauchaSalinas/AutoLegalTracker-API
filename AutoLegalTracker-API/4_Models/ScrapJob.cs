@@ -1,19 +1,12 @@
-﻿using AutoLegalTracker_API._2_Business;
-using AutoLegalTracker_API._5_WebServices;
+﻿using AutoLegalTracker_API.Business;
 using Quartz;
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using System.Drawing.Text;
 
 public class ScrapJob : IJob
 {
-    private readonly CasoBLL caso;
-    private readonly IConfiguration _configuration;
-    public ScrapJob(CasoBLL casoBLL, IConfiguration configuration)
+    private readonly ScrapBusiness caso;
+    public ScrapJob(ScrapBusiness ScrapBusiness)
     {
-        caso = casoBLL;
-        _configuration = configuration;
+        caso = ScrapBusiness;
     }
     public async Task Execute(IJobExecutionContext context)
     {
