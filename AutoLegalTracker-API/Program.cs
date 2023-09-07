@@ -32,7 +32,7 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
 
 
-            builder.Services.AddTransient<CasoBLL>();
+            builder.Services.AddTransient<ScrapBusiness>();
             builder.Services.AddTransient<ScrapJob>();
             // Add dependency injection to the Services Layer
             builder.Services.AddScoped<EmailService>();
@@ -148,7 +148,7 @@ namespace AutoLegalTracker_API
             {
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
 
-                // Context.Database.Migrate();
+                Context.Database.Migrate();
 
             }
             
