@@ -7,10 +7,10 @@ using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
-using Google.Apis.Sheets.v4.Data;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Net.WebRequestMethods;
-using System;
+using AutoLegalTracker_API._2_Business;
+using AutoLegalTracker_API._5_WebServices;
+using Quartz;
+using System.Globalization;
 
 namespace AutoLegalTracker_API
 {
@@ -35,17 +35,22 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
 
 
+            builder.Services.AddTransient<CasoBLL>();
+            builder.Services.AddTransient<ScrapJob>();
             // Add dependency injection to the Services Layer
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<GoogleOAuth2Service>();
             builder.Services.AddScoped<GoogleCalendarService>();
             builder.Services.AddScoped<GoogleDriveService>();
+            builder.Services.AddTransient<EmailService>();
+            builder.Services.AddTransient<PuppeteerService>();
+            // TODO Add dependency injection to the Data Access Layer
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
             builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
             builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
-            builder.Services.AddScoped<IDataAccesssAsync<Calendar>, DataAccessAsync<Calendar>>();
+            builder.Services.AddScoped<IDataAccesssAsync<Models.Calendar>, DataAccessAsync<Models.Calendar>>();
 
 
             builder.Services.AddSingleton(provider =>
@@ -57,8 +62,7 @@ namespace AutoLegalTracker_API
             
 
             // Add Quartz scheduler service
-            builder.Services.AddSingleton<CronService>();
-
+            builder.Configuration.AddJsonFile("scrapSettings.json");
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -83,6 +87,26 @@ namespace AutoLegalTracker_API
                             .AllowCredentials();
                 });
             });
+
+            builder.Services.AddQuartz(q =>
+            {
+                q.SchedulerId = "Scheduler-Core";
+                q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+                q.ScheduleJob<ScrapJob>(trigger => trigger
+                    .WithIdentity("Combined Configuration Trigger")
+                    .StartNow()
+                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
+                    .WithDescription("my awesome trigger configured for a job with single call")
+                );
+            });
+
+            // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
+            builder.Services.AddQuartzHostedService(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
+
 
             // Add Authentication
             builder.Services.AddAuthentication(options =>
@@ -127,20 +151,16 @@ namespace AutoLegalTracker_API
             {
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
 
-                Context.Database.Migrate();
+                // Context.Database.Migrate();
 
-                // Start Quartz scheduler
-                var quartzService = scope.ServiceProvider.GetRequiredService<CronService>();
-                quartzService.StartAsync().Wait();
             }
-
+            
 
             app.UseHttpsRedirection();
             app.UseCors(app => app.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-
             app.Run();
 
             // TODO Lsalinas: manage DI resources

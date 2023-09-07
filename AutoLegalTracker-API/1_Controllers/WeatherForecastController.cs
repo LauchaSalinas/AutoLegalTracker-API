@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AutoLegalTracker_API.Controllers
 {
@@ -19,14 +20,15 @@ namespace AutoLegalTracker_API.Controllers
         private readonly WeatherForecastBusiness _weatherForecastBLL;
         private readonly EmailBusiness _email;
         private readonly ALTContext _context;
+        private readonly IConfiguration _configuration;
 
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBusiness weatherForecastBLL, EmailBusiness mail)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ALTContext context, WeatherForecastBusiness weatherForecastBLL, EmailBusiness mail, IConfiguration configuration)
         {
             _email = mail;
             _logger = logger;
             _weatherForecastBLL = weatherForecastBLL;
             _context = context;
+            _configuration = configuration;
         }
         //[HttpGet(Name = "GetWeatherForecast")]
         //public async Task<IEnumerable<WeatherForecast>> Get()

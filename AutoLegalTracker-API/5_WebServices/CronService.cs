@@ -22,7 +22,7 @@ namespace AutoLegalTracker_API.Services
                 .WithIdentity("myTrigger", "group1")
                 .StartNow()
                 .WithSimpleSchedule(x => x
-                    .WithIntervalInMinutes(1)
+                    .WithIntervalInMinutes(10)
                     .RepeatForever())
                 .Build();
 
