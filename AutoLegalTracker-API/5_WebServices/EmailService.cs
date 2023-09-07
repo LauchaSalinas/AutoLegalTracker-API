@@ -34,7 +34,7 @@ namespace AutoLegalTracker_API.Services
         #endregion Constructor
 
         #region Public Methods
-        public bool sendEmail(Email emailTemplate, string userTo)
+        public bool sendEmail(EmailTemplate emailTemplate, string userTo)
         {
             try
             {

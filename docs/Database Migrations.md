@@ -4,7 +4,7 @@ via EntityFrameworkCore
 Open terminal:  
 ```
 dotnet ef migrations --project ./AutoLegalTracker-API/AutoLegalTracker-API.csproj list  
-dotnet ef migrations --project ./AutoLegalTracker-API/AutoLegalTracker-API.csproj add [migration name]
+dotnet ef migrations --project ./AutoLegalTracker-API/AutoLegalTracker-API.csproj add [migration name] -o 3_DataAccess/Migrations
 dotnet ef database --project ./AutoLegalTracker-API/AutoLegalTracker-API.csproj update  
 ```
 

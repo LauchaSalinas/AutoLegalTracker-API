@@ -1,4 +1,3 @@
-using AutoLegalTracker_API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz.Impl;
@@ -6,13 +5,11 @@ using Quartz.Impl;
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
+using AutoLegalTracker_API.WebServices;
+using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API._2_Business;
 using AutoLegalTracker_API._5_WebServices;
 using Quartz;
-using Microsoft.Extensions.Options;
-using Quartz.Impl.Calendar;
-using Quartz.Impl.Matchers;
-using System.Configuration;
 using System.Globalization;
 
 namespace AutoLegalTracker_API
@@ -27,27 +24,50 @@ namespace AutoLegalTracker_API
 
             builder.Services.AddControllers();
 
+            #region Dependency Injection
+
             // Add dependency injection to the Business Logic Layer
             builder.Services.AddTransient<JwtBusiness>();
             builder.Services.AddTransient<UserBusiness>();
-            builder.Services.AddTransient<WeatherForecastBLL>();
-            builder.Services.AddTransient<EmailBLL>();
+            builder.Services.AddTransient<WeatherForecastBusiness>();
+            builder.Services.AddTransient<EmailBusiness>();
+            builder.Services.AddTransient<CalendarBusiness>();
+            builder.Services.AddTransient<MedicalAppointmentBusiness>();
+
+
             builder.Services.AddTransient<CasoBLL>();
             builder.Services.AddTransient<ScrapJob>();
             // Add dependency injection to the Services Layer
+            builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<GoogleOAuth2Service>();
+            builder.Services.AddScoped<GoogleCalendarService>();
+            builder.Services.AddScoped<GoogleDriveService>();
             builder.Services.AddTransient<EmailService>();
             builder.Services.AddTransient<PuppeteerService>();
             // TODO Add dependency injection to the Data Access Layer
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
-            builder.Services.AddScoped<IDataAccesssAsync<Email>, DataAccessAsync<Email>>();
+            builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
+            builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
+            builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
+            builder.Services.AddScoped<IDataAccesssAsync<Models.Calendar>, DataAccessAsync<Models.Calendar>>();
+
+
+            builder.Services.AddSingleton(provider =>
+            {
+                var schedulerFactory = new StdSchedulerFactory();
+                return schedulerFactory.GetScheduler().Result;
+            });
+
             
-      
+
             // Add Quartz scheduler service
             builder.Configuration.AddJsonFile("scrapSettings.json");
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-                builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen();
+
+            #endregion Dependency Injection
 
             builder.Services.AddDbContext<ALTContext>(options =>
             {
@@ -55,13 +75,16 @@ namespace AutoLegalTracker_API
                 options.UseSqlServer(connectionString);
             });
 
+            #region CORS and Security
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", builder =>
+                options.AddPolicy("AllowSpecificOrigin", corsBuilder =>
                 {
-                    builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
+                    corsBuilder.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
                 });
             });
 
@@ -103,12 +126,21 @@ namespace AutoLegalTracker_API
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT_KEY"] ?? String.Empty))
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["AuthToken"];
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
+            #endregion CORS and Security
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -125,11 +157,23 @@ namespace AutoLegalTracker_API
             
 
             app.UseHttpsRedirection();
-            app.UseCors(app => app.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors(app => app.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();
+
+            // TODO Lsalinas: manage DI resources
+            // Use appropriate lifetime management: Depending on the nature of the dependency,
+            // you can manage its lifetime appropriately. For example, you can use a Singleton
+            // scope for a service that should be shared across the application, or you can use
+            // a Scoped scope for a service that should have a shorter lifespan(e.g., within a
+            // single HTTP request).By managing the lifetime correctly, you can avoid unnecessary
+            // resource allocation.
+
+            // Lazy initialization: If a dependency represents a resource that should be allocated
+            // only when needed, you can use lazy initialization.In C#, you can use Lazy<T> to
+            // achieve this. The resource will only be created when it's accessed for the first time.
         }
     }
 }

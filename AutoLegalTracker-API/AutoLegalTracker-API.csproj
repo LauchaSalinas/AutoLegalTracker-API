@@ -11,7 +11,10 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.61.0.3137" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3120" />
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.61.0.1869" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.61.0.3141" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.20" />
@@ -40,5 +43,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="5_WebServices\" />
+    <None Remove="0_Common\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="0_Common\ErrorsResource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

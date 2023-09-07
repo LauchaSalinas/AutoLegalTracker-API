@@ -4,16 +4,18 @@ using AutoLegalTracker_API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AutoLegalTracker_API.Migrations
+namespace AutoLegalTracker_API.DataAccess.Migrations
 {
     [DbContext(typeof(ALTContext))]
-    partial class ALTContextModelSnapshot : ModelSnapshot
+    [Migration("20230901000024_2_adding_legal_cases_models2")]
+    partial class _2_adding_legal_cases_models2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,12 +131,10 @@ namespace AutoLegalTracker_API.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("userId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("LegalCases");
                 });
@@ -174,8 +174,6 @@ namespace AutoLegalTracker_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LegalAutomationId");
-
                     b.HasIndex("LegalCaseId");
 
                     b.ToTable("LegalNotifications");
@@ -195,7 +193,10 @@ namespace AutoLegalTracker_API.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LegalNotificationId")
+                    b.Property<int>("LegalNotification")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LegalNotificationId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -304,53 +305,27 @@ namespace AutoLegalTracker_API.Migrations
                     b.Navigation("Email");
                 });
 
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCase", b =>
-                {
-                    b.HasOne("AutoLegalTracker_API.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalNotification", b =>
                 {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalAutomation", "LegalAutomation")
-                        .WithMany("LegalNotifications")
-                        .HasForeignKey("LegalAutomationId");
-
                     b.HasOne("AutoLegalTracker_API.Models.LegalCase", "LegalCase")
                         .WithMany("LegalNotifications")
                         .HasForeignKey("LegalCaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("LegalAutomation");
-
                     b.Navigation("LegalCase");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.MedicalAppointment", b =>
                 {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalNotification", "LegalNotification")
+                    b.HasOne("AutoLegalTracker_API.Models.LegalNotification", null)
                         .WithMany("MedicalAppointments")
-                        .HasForeignKey("LegalNotificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LegalNotification");
+                        .HasForeignKey("LegalNotificationId");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.EmailTemplate", b =>
                 {
                     b.Navigation("EmailLogs");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalAutomation", b =>
-                {
-                    b.Navigation("LegalNotifications");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCase", b =>
