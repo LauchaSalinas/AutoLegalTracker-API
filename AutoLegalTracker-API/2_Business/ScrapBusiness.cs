@@ -1,5 +1,6 @@
 ﻿using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AutoLegalTracker_API.Business
 {
@@ -19,11 +20,16 @@ namespace AutoLegalTracker_API.Business
         #region Public Methods
         public async Task CheckNewCases()
         {
+            // TODO: reduce the text in the methods
+            #region Variables
+            var timeout = int.Parse(_configuration["timeout"]);
+
+            #endregion Variables
             try{
                 await _puppeteerService.InicializeService();
                 
                 var controlador = await _puppeteerService.LogIn(_configuration["urlDeLaPaginaLocalhost"], _configuration["selectorInputUsuario"], _configuration["selectorInputContraseña"], _configuration["contenidoInputUsuario"], _configuration["contenidoInputContraseña"], _configuration["selectorBotonIngresar"]);
-                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+                await _puppeteerService.Wait(timeout);
                 controlador = await _puppeteerService.GoToUrl(await _puppeteerService.GetPropertyWithSelector(_configuration["selectorMisCausas"], _configuration["propiedadHipervinculo"], int.Parse(_configuration["posicionMisCausas"])));
                 await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
                 await _puppeteerService.ClickSelector(_configuration["selectorBotonMostrarTodasLasCausas"], _configuration["selectorObjetoConfirmacion"]);
