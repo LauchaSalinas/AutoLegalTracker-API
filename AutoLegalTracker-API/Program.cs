@@ -85,24 +85,24 @@ namespace AutoLegalTracker_API
                 });
             });
 
-            builder.Services.AddQuartz(q =>
-            {
-                q.SchedulerId = "Scheduler-Core";
-                q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
-                q.ScheduleJob<ScrapJob>(trigger => trigger
-                    .WithIdentity("Combined Configuration Trigger")
-                    .StartNow()
-                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
-                    .WithDescription("my awesome trigger configured for a job with single call")
-                );
-            });
+            // builder.Services.AddQuartz(q =>
+            // {
+            //     q.SchedulerId = "Scheduler-Core";
+            //     q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+            //     q.ScheduleJob<ScrapJob>(trigger => trigger
+            //         .WithIdentity("Combined Configuration Trigger")
+            //         .StartNow()
+            //         .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
+            //         .WithDescription("my awesome trigger configured for a job with single call")
+            //     );
+            // });
 
             // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-            builder.Services.AddQuartzHostedService(options =>
-            {
-                // when shutting down we want jobs to complete gracefully
-                options.WaitForJobsToComplete = true;
-            });
+            // builder.Services.AddQuartzHostedService(options =>
+            // {
+            //     // when shutting down we want jobs to complete gracefully
+            //     options.WaitForJobsToComplete = true;
+            // });
 
 
             // Add Authentication

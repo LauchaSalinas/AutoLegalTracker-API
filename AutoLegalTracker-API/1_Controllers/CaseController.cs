@@ -79,7 +79,8 @@ namespace AutoLegalTracker_API._1_Controllers
             {
                 var automatedCases = await _caseBusiness.GetAutomatedCases(user);
                 var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
-
+                // Obtener casos nuevos del mes
+                // Obtener notificaciones sin responder
                 var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
                 var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
 

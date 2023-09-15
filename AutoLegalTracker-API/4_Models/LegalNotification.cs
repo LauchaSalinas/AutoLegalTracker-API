@@ -17,6 +17,7 @@
         public bool UseAutomation { get; set; }
         public int? LegalAutomationId { get; set; }
         public virtual LegalAutomation LegalAutomation { get; set; } // Navigation property
-        public virtual List<MedicalAppointment> MedicalAppointments { get; set; } = new List<MedicalAppointment>();
+        public int? MedicalAppointmentId { get; set; }
+        public virtual MedicalAppointment MedicalAppointment { get; set; } // Navigation property
     }
 }

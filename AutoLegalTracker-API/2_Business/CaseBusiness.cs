@@ -64,6 +64,8 @@ namespace AutoLegalTracker_API.Business
 
         #region Private Methods
 
+        private void GetActionsForCase(){}
+
         #endregion Private Methods
 
     }
