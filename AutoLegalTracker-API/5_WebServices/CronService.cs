@@ -3,6 +3,7 @@ using Quartz;
 
 namespace AutoLegalTracker_API.Services
 {
+    [Obsolete("This was replaced by the Quartz DI in the Service builder")]
     public class CronService
     {
         private readonly IScheduler _scheduler;

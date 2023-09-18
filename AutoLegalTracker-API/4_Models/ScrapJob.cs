@@ -1,35 +1,41 @@
 ﻿using AutoLegalTracker_API.Business;
 using Quartz;
+using System.Runtime.CompilerServices;
 
 public class ScrapJob : IJob
 {
-    private readonly ScrapBusiness caso;
-    public ScrapJob(ScrapBusiness ScrapBusiness)
+    private readonly ScrapBusiness _scrapBusiness;
+    private readonly ActionBusiness _actionBusiness;
+    public ScrapJob(ScrapBusiness scrapBusiness, ActionBusiness actionBusiness)
     {
-        caso = ScrapBusiness;
+        _scrapBusiness = scrapBusiness;
+        _actionBusiness = actionBusiness;
     }
     public async Task Execute(IJobExecutionContext context)
     {
-        Console.WriteLine("MyJob executed at: " + DateTime.Now);
-        // Your task implementation goes here
+        // CheckNewCasesJob
+        Console.WriteLine("CheckNewCasesJob executed at: " + DateTime.Now);
         try
         {
-            await caso.CheckNewCases();
+            await _scrapBusiness.CheckNewCases();
+            Console.WriteLine("CheckNewCasesJob finished at: " + DateTime.Now);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
         }
-        
 
-        Console.WriteLine("ScrapJob started at: " + DateTime.Now);
-        await EmulateAsyncMethod(10); // Emulate 10 seconds delay
-        Console.WriteLine("ScrapJob finished at: " + DateTime.Now);
+        // CheckForActionsForNewNotificationsJob
+        try
+        {
+            await _actionBusiness.RunActionsToNewNotifications();
+            Console.WriteLine("CheckForActionsForNewNotifications finished at: " + DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
 
-        Console.WriteLine("MedicalAppointmentAssignationJob started at: " + DateTime.Now);
-        await EmulateAsyncMethod(10); // Emulate 10 seconds delay
-        Console.WriteLine("MedicalAppointmentAssignationJob finished at: " + DateTime.Now);
-        await Task.CompletedTask;
     }
     static async Task EmulateAsyncMethod(int secondsDelay)
     {

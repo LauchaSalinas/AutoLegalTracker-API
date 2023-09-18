@@ -102,20 +102,17 @@ namespace AutoLegalTracker_API.Business
             var user = await GetUserFromSub(userSub);
             return user;
         }
-        private async Task<User?> GetUserFromSub(string userSub)
+        private async Task<User> GetUserFromSub(string userSub)
         {
             var userList = await _userAccess.Query(user => user.Sub == userSub);
-            // TODO Lsalinas: Check if this is the correct way to handle this
-            if (userList.Count() > 1)
-                throw new ApplicationException("More than one user with the same sub");
-            if (userList.Count() == 0)
-                return null;
-            if (userList == null)
-                return null;
-
-            User user = userList.First();
-
+            User user = userList.FirstOrDefault();
             return user;
+        }
+
+        public async Task<List<User>> GetAllUsers()
+        {
+            var users = await _userAccess.GetAll();
+            return users.ToList();
         }
     }
 }

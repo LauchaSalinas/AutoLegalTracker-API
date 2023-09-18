@@ -23,6 +23,23 @@ namespace AutoLegalTracker_API.Business
 
         #region Public Methods
         
+        public async Task<LegalCase> GetCaseById(User user, int caseId)
+        {
+            // get case from database
+            var legalCase = await _legalCaseDataAccess.GetCaseById(caseId);
+            if (legalCase == null)
+            {
+                // throw exception
+                throw new ApplicationException("Case not found.");
+            }
+            if (legalCase.UserId != user.Id)
+            {
+                // throw exception
+                throw new ApplicationException("User does not have permission to access this case.");
+            }
+            // return case
+            return legalCase;
+        }
         public async Task<List<LegalCase>> GetCases(User user)
         {
             // get cases from database

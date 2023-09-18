@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz.Impl;
+using Quartz;
 
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
-using Quartz;
+using AutoLegalTracker_API.Common;
 
 namespace AutoLegalTracker_API
 {
@@ -30,9 +31,10 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<EmailBusiness>();
             builder.Services.AddTransient<CalendarBusiness>();
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
-
-
+            builder.Services.AddTransient<ActionBusiness>();
             builder.Services.AddTransient<ScrapBusiness>();
+            builder.Services.AddTransient<ConditionBusiness>();
+
             builder.Services.AddTransient<ScrapJob>();
             // Add dependency injection to the Services Layer
             builder.Services.AddScoped<EmailService>();
@@ -41,14 +43,17 @@ namespace AutoLegalTracker_API
             builder.Services.AddScoped<GoogleDriveService>();
             builder.Services.AddTransient<EmailService>();
             builder.Services.AddTransient<PuppeteerService>();
-            // TODO Add dependency injection to the Data Access Layer
+
+            // Add dependency injection to the Data Access Layer
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
             builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
             builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
             builder.Services.AddScoped<IDataAccesssAsync<Models.Calendar>, DataAccessAsync<Models.Calendar>>();
-
+            builder.Services.AddScoped<ActionDataAccess>(); // check if this is neccesary
+            builder.Services.AddScoped<LegalCaseDataAccessAsync>(); // check if this is neccesary
+            builder.Services.AddScoped<LegalNotificationDataAccess>(); // check if this is neccesary
 
             builder.Services.AddSingleton(provider =>
             {
@@ -72,18 +77,7 @@ namespace AutoLegalTracker_API
                 options.UseSqlServer(connectionString);
             });
 
-            #region CORS and Security
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowSpecificOrigin", corsBuilder =>
-                {
-                    corsBuilder.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty)
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                });
-            });
+            #region Quartz
 
             // builder.Services.AddQuartz(q =>
             // {
@@ -103,6 +97,21 @@ namespace AutoLegalTracker_API
             //     // when shutting down we want jobs to complete gracefully
             //     options.WaitForJobsToComplete = true;
             // });
+
+            #endregion Quartz
+
+            #region CORS and Security
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin", corsBuilder =>
+                {
+                    corsBuilder.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
+                });
+            });
 
 
             // Add Authentication
@@ -151,7 +160,17 @@ namespace AutoLegalTracker_API
                 Context.Database.Migrate();
 
             }
-            
+
+
+            if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
+                    new DatabaseStartup(Context).InitializeWithData();
+                }
+            }
+
 
             app.UseHttpsRedirection();
             app.UseCors(app => app.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty).AllowAnyMethod().AllowAnyHeader().AllowCredentials());

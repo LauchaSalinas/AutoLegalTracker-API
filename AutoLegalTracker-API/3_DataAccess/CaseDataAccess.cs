@@ -50,6 +50,11 @@ namespace AutoLegalTracker_API.DataAccess
             }
         }
 
+        public async Task<LegalCase> GetCaseById(int legalCaseId)
+        {
+            return await _context.LegalCases.SingleAsync(legalCase => legalCase.Id == legalCaseId);
+        }
+
         // Other methods for LegalCase entity using _context
     }
 }
