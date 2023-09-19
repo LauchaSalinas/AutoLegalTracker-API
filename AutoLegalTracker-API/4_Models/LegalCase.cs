@@ -9,11 +9,16 @@ namespace AutoLegalTracker_API.Models
     {
         public LegalCase()
         {
-
+            LegalCaseAttributes = new HashSet<LegalCaseAttribute>();
+            LegalNotifications = new HashSet<LegalNotification>();
+            RequestedAnalyses = new HashSet<RequestedAnalysis>();
+            RequestedCourtOrders = new HashSet<RequestedCourtOrder>();
         }
 
         public int Id { get; set; }
         public int UserId { get; set; }
+        public virtual User User { get; set; } // Navigation property
+        
         /// <summary>
         /// Caratula de casusa
         /// </summary>
@@ -30,7 +35,7 @@ namespace AutoLegalTracker_API.Models
         /// <summary>
         /// Peritajes
         /// </summary>
-        public virtual List<RequestedAnalysis> RequestedAnalyses { get; set; } = new List<RequestedAnalysis>(); // Navigation property
+        public virtual ICollection<RequestedAnalysis> RequestedAnalyses { get; set; }  // Navigation property
         public string? CaseNumber { get; set; }
         [Column(TypeName = "decimal(18, 2)")]
         public decimal ExpenseAdvances { get; set; } = 0;
@@ -45,13 +50,11 @@ namespace AutoLegalTracker_API.Models
         /// <summary>
         /// Oficios Judiciales
         /// </summary>
-        public List<RequestedCourtOrder> RequestedCourtOrders { get; set; } = new List<RequestedCourtOrder>();
+        public virtual ICollection<RequestedCourtOrder> RequestedCourtOrders { get; set; } // Navigation property
 
-        // [NotMapped]
-        // public List<CaseAction> AvailableActions { get; set; } = new List<CaseAction>();
-        public virtual List<LegalCaseAttribute> LegalCaseAttributes { get; set; } = new List<LegalCaseAttribute>(); // Navigation property
-        public virtual User User { get; set; } // Navigation property
-        public virtual List<LegalNotification> LegalNotifications { get; set; } = new List<LegalNotification>();
+        public virtual ICollection<LegalCaseAttribute> LegalCaseAttributes { get; set; } // Navigation property
+        
+        public virtual ICollection<LegalNotification> LegalNotifications { get; set; } // Navigation property
     } 
     
 

@@ -4,7 +4,7 @@
     {
         public LegalAutomation()
         {
-
+            LegalNotifications = new HashSet<LegalNotification>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -25,6 +25,6 @@
         public string JurisdictionDoesNotContain { get; set; } // probably this will switch to a list of strings
         public bool ExpenseAdvancesPaid { get; set; } // Anticipo de gastos pagos
         public virtual User User { get; set; } // Navigation property   
-        public virtual List<LegalNotification> LegalNotifications { get; set; } = new List<LegalNotification>();
+        public virtual ICollection<LegalNotification> LegalNotifications { get; set; }
     }
 }

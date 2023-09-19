@@ -7,9 +7,8 @@ namespace AutoLegalTracker_API.Business
         public ConditionBusiness() { }
         public bool CheckLegalCaseCondition (LegalCaseCondition condition, LegalCase legalCase)
         {
-            if (condition == null)
-                return true; // no condition
-            return false;
+            return true;
+            // TODO implement this method
         }
 
         public bool CheckLegalNotificationCondition(NotificationCondition condition, LegalNotification legalNotification)

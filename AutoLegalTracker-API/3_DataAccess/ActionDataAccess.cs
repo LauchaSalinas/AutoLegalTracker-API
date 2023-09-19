@@ -39,7 +39,7 @@ namespace AutoLegalTracker_API.DataAccess
 
         public async Task<List<LegalCaseAction>> GetAllActionsToRunThem()
         {
-            return _context.Set<LegalCaseAction>().Where(x => x.UserTypeAllowedToUseAction.Any(y => y.UserType.Name == "System")).ToList();
+            return _context.Set<LegalCaseAction>().Include(x => x.NotificationCondition).Include(x => x.LegalCaseAttributesToAdd).Where(x => x.UserTypes.Any(UserType => UserType.Name == "System")).ToList();
         }
 
         #endregion Public Methods

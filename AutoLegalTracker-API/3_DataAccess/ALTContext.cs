@@ -22,11 +22,32 @@ namespace AutoLegalTracker_API.DataAccess
         public DbSet<LegalCaseAction> LegalCaseActions { get; set; }
         public DbSet<LegalCaseAttribute> LegalCaseAttributes { get; set; }
         public DbSet<LegalCaseCondition> LegalCaseConditions{ get; set; }
-        public DbSet<LegalCaseAttribute_LegalCaseCondition> LegalCaseAttribute_LegalCaseCondition { get; set; }
-        public DbSet<LegalCaseAction_LegalCaseAttribute> LegalCaseAction_LegalCaseAttribute { get; set; }
         public DbSet<NotificationCondition> NotificationConditions { get; set; }
         public DbSet<RequestedAnalysis> RequestedAnalyses { get; set; }
         public DbSet<RequestedCourtOrder> RequestedCourtOrders { get; set; }
-        public DbSet<LegalCaseAction_UserType> LegalCaseAction_UserType { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LegalCaseAction>()
+                    .HasOne(ac => ac.User)
+                    .WithMany()
+                    .HasForeignKey(ac => ac.UserId)
+                    .OnDelete(DeleteBehavior.Restrict); // Specify no cascading delete
+
+
+            modelBuilder.Entity<LegalCaseAction>()
+                .HasMany(ac => ac.LegalCaseAttributesToAdd)
+                .WithMany(at => at.LegalCaseActionsWhereItsAdded)
+                .UsingEntity("LegalCaseAttributesToAdd");
+            
+            modelBuilder.Entity<LegalCaseAction>()
+                .HasMany(ac => ac.LegalCaseAttributesToDelete)
+                .WithMany(at => at.LegalCaseActionsWhereItsDeleted)
+                .UsingEntity("LegalCaseAttributesToDelete");
+
+            base.OnModelCreating(modelBuilder);
+
+        }
+
     }
 }
