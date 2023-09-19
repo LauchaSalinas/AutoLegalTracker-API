@@ -3,6 +3,7 @@ using AutoLegalTracker_API.WebServices;
 
 using AutoLegalTracker_API.Models;
 using Microsoft.EntityFrameworkCore;
+using Google.Apis.Drive.v3.Data;
 
 namespace AutoLegalTracker_API.Business
 {
@@ -23,7 +24,7 @@ namespace AutoLegalTracker_API.Business
 
         #region Public Methods
         
-        public async Task<List<LegalCase>> GetCases(User user)
+        public async Task<List<LegalCase>> GetCases(Models.User user)
         {
             // get cases from database
             var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id);
@@ -32,14 +33,14 @@ namespace AutoLegalTracker_API.Business
             return cases.ToList();
         }
 
-        public async Task<List<LegalCase>> GetAutomatedCases(User user)
+        public async Task<List<LegalCase>> GetAutomatedCases(Models.User user)
         {
             // get cases from database
             var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id && legalCase.ClosedAt == null);
             return cases.ToList();
         }
 
-        public async Task<List<LegalCase>> GetCasesWithPendingEventsNextWeek(User user)
+        public async Task<List<LegalCase>> GetCasesWithPendingEventsNextWeek(Models.User user)
         {
             try
             {
@@ -58,7 +59,24 @@ namespace AutoLegalTracker_API.Business
             }
         }
 
+        public async Task<List<LegalCase>> GetNewCasesInThisMonth()
+        {
+            try
+            {
+                //TODO terminar metodo nuevo casos del mes
+                // First day month
+                var FirstDayOfThisMonth = DateTime.Now.Month;
 
+
+                var casesCreatedInThisMonth = await _legalCaseAccessGeneric.Query(legalCase => legalCase.CreatedAt.Month == FirstDayOfThisMonth); 
+
+                return casesCreatedInThisMonth.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error while getting cases with pending events for next week.", ex);
+            }
+        }
 
         #endregion Public Methods
 

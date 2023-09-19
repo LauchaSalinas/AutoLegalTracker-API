@@ -67,25 +67,40 @@ namespace AutoLegalTracker_API._1_Controllers
 
             
         }
-        [Authorize]
+
+        //[Authorize]
         [HttpGet("GetDashboardStatistics")]
         public async Task<ActionResult> GetDashboardStatistics()
         {
-            User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
-            if (user == null)
-                return new BadRequestObjectResult(new { error = "User error" });
+            //User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
+            //if (user == null)
+            //    return new BadRequestObjectResult(new { error = "User error" });
 
             try
             {
-                var automatedCases = await _caseBusiness.GetAutomatedCases(user);
-                var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
+                // Obtener casos nuevos del mes
+                var newCasesInThisMonth = await _caseBusiness.GetNewCasesInThisMonth();
 
-                var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
-                var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
+                // Obtener notificaciones sin responder
+                //var casesNotificationUnseen  = 0
+
+                return new OkObjectResult(new { newCasesInThisMonth }); ; 
+                
+
+                //return new OkObjectResult(new { , pendingEvents });
+
+                //Automated Cases
+                //var automatedCases = await _caseBusiness.GetAutomatedCases(user);
+                ////Pending Cases in the next week
+                //var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
+
+                //Object Messagge Text
+                //var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
+                //var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
 
                 // TODO JGonzalez: seguir desde aca y revisar lo hecho previamente, revisar que los modelos se agreguen al contexto y revisar la inyeccion de dependencias
 
-                return new OkObjectResult( new { automated, pendingEvents } );
+                //return new OkObjectResult( new { automated, pendingEvents } );
             }
             catch (ApplicationException appex)
             {
