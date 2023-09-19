@@ -6,14 +6,14 @@ namespace AutoLegalTracker_API.Business
     public class LegalNotificationBusiness
     {
         private readonly LegalNotificationDataAccess _legalNotificationAccess;
-        public LegalNotificationBusiness() 
+        public LegalNotificationBusiness(LegalNotificationDataAccess legalNotificationDataAccess) 
         { 
-
+            _legalNotificationAccess = legalNotificationDataAccess;
         }
-        public async Task<List<LegalNotification>> GetNotifications(LegalCase legalCase)
+        public List<LegalNotification> GetNotifications(LegalCase legalCase)
         {
             // get cases from database
-            var notifications = await _legalNotificationAccess.GetLegalNotificationsFromLegalCase(legalCase);
+            var notifications = _legalNotificationAccess.GetLegalNotificationsFromLegalCase(legalCase);
 
             // return cases
             return notifications;

@@ -12,8 +12,10 @@ namespace AutoLegalTracker_API.Business
         private readonly CaseBusiness _caseBusiness;
         private readonly UserBusiness _userBusiness;
         private readonly LegalNotificationBusiness _legalNotificationBusiness;
+        private readonly LegalCaseDataAccessAsync _legalCaseDataAccessAsync;
+        private readonly ALTContext _context;
 
-        public ActionBusiness(IConfiguration configuration, ActionDataAccess actionAccess, ConditionBusiness conditionBusiness, CaseBusiness caseBusiness, UserBusiness userBusiness, LegalNotificationBusiness legalNotificationBusiness)
+        public ActionBusiness(IConfiguration configuration, ActionDataAccess actionAccess, ConditionBusiness conditionBusiness, CaseBusiness caseBusiness, UserBusiness userBusiness, LegalNotificationBusiness legalNotificationBusiness, LegalCaseDataAccessAsync legalCaseDataAccessAsync, ALTContext context)
         {
             _configuration = configuration;
             _actionAccess = actionAccess;
@@ -21,6 +23,8 @@ namespace AutoLegalTracker_API.Business
             _caseBusiness = caseBusiness;
             _userBusiness = userBusiness;
             _legalNotificationBusiness = legalNotificationBusiness;
+            _legalCaseDataAccessAsync = legalCaseDataAccessAsync;
+            _context = context;
         }
 
         #endregion Constructor
@@ -55,13 +59,13 @@ namespace AutoLegalTracker_API.Business
 
             // check if the user has permission to execute the action
 
-            bool userHasPermission = actionFromDb.UserTypeAllowedToUseAction.Exists(x => x.UserType == user.userType);
+            bool userHasPermission = actionFromDb.UserTypes.Any(UserType => UserType == user.userType);
             bool conditionsAreMet = true;
 
             if (userHasPermission & conditionsAreMet)
             {
                 // execute the action
-                await ExecuteAction(action);
+                await ExecuteAction(action, legalCase);
             }
             else
             {
@@ -74,7 +78,7 @@ namespace AutoLegalTracker_API.Business
         {
             //check CaseConditions
             if (_conditionBusiness.CheckLegalCaseCondition(action.LegalCaseCondition, legalCase))
-                return false;
+                return true;
             return false;
         }
 
@@ -82,11 +86,11 @@ namespace AutoLegalTracker_API.Business
         {
             //check CaseConditions
             if (_conditionBusiness.CheckLegalNotificationCondition(action.NotificationCondition, legalNotification))
-                return false;
+                return true;
             return false;
         }
 
-        private async Task ExecuteAction(LegalCaseAction legalCaseAction)
+        private async Task ExecuteAction(LegalCaseAction legalCaseAction, LegalCase legalCase)
         {
             if (legalCaseAction.LegalResponseTemplateId != null)
             {
@@ -103,18 +107,23 @@ namespace AutoLegalTracker_API.Business
                 // send an email
             }
 
-            if (legalCaseAction.LegalCaseAttributesToAddOrDelete.Count > 0)
+            if (legalCaseAction.LegalCaseAttributesToAdd.Count > 0)
             {
-                foreach (var attribute in legalCaseAction.LegalCaseAttributesToAddOrDelete)
+                foreach (var attribute in legalCaseAction.LegalCaseAttributesToAdd)
                 {
-                    if (attribute.Add)
-                    {
-                        //legalNotification.LegalCase.LegalCaseAttributes.Add(attribute.LegalCaseAttribute);
-                    }
-                    else
-                    {
-                        //legalNotification.LegalCase.LegalCaseAttributes.Remove(attribute.LegalCaseAttribute);
-                    }
+                    legalCase.LegalCaseAttributes.Add(attribute);
+                    _context.LegalCases.Update(legalCase);
+                    _context.SaveChanges();
+                }
+            }
+
+            if (legalCaseAction.LegalCaseAttributesToAdd.Count > 0)
+            {
+                foreach (var attribute in legalCaseAction.LegalCaseAttributesToDelete)
+                {
+                    legalCase.LegalCaseAttributes.Remove(attribute);
+                    _context.LegalCases.Update(legalCase);
+                    _context.SaveChanges();
                 }
             }
         }
@@ -139,15 +148,23 @@ namespace AutoLegalTracker_API.Business
                         caseConditionsAreMet = CheckCaseConditions(action, legalCase);
 
                         if (caseConditionsAreMet)
-                        {
-                            var legalNotifications = await _legalNotificationBusiness.GetNotifications(legalCase);
+                        {   
+                            List<LegalNotification> legalNotifications = new List<LegalNotification>();
+                            try{
+                                legalNotifications = _legalNotificationBusiness.GetNotifications(legalCase);
+                            }
+                            catch (Exception ex)
+                            {
+                                //save to log table
+                                var errorMsgToTable = ex;
+                            }
                             foreach (var legalNotification in legalNotifications)
                             {
                                 bool notificationConditionsAreMet;
                                 notificationConditionsAreMet = CheckNotificationCondition(action, legalNotification);
                                 if (notificationConditionsAreMet)
                                 {
-                                    await ExecuteAction(action);
+                                    await ExecuteAction(action, legalCase);
                                 }
                             }
                         }

@@ -34,6 +34,8 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<ActionBusiness>();
             builder.Services.AddTransient<ScrapBusiness>();
             builder.Services.AddTransient<ConditionBusiness>();
+            builder.Services.AddTransient<CaseBusiness>();
+            builder.Services.AddTransient<LegalNotificationBusiness>();
 
             builder.Services.AddTransient<ScrapJob>();
             // Add dependency injection to the Services Layer
@@ -46,6 +48,7 @@ namespace AutoLegalTracker_API
 
             // Add dependency injection to the Data Access Layer
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
+            builder.Services.AddScoped<IDataAccesssAsync<LegalCase>, DataAccessAsync<LegalCase>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
             builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
@@ -156,20 +159,20 @@ namespace AutoLegalTracker_API
             using (var scope = app.Services.CreateScope())
             {
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
-
                 Context.Database.Migrate();
 
             }
 
 
-            if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
-            {
-                using (var scope = app.Services.CreateScope())
-                {
-                    var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
-                    new DatabaseStartup(Context).InitializeWithData();
-                }
-            }
+            // if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+            // {
+            //     using (var scope = app.Services.CreateScope())
+            //     {
+            //         var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
+            //         var actionBusiness = scope.ServiceProvider.GetRequiredService<ActionBusiness>();
+            //         new DatabaseStartup(Context, actionBusiness).InitializeWithData();
+            //     }
+            // }
 
 
             app.UseHttpsRedirection();

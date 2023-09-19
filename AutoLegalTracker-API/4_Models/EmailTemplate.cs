@@ -6,6 +6,11 @@ namespace AutoLegalTracker_API.Models
 {
     public class EmailTemplate
     {
+        public EmailTemplate() 
+        { 
+            EmailLogs = new HashSet<EmailLog>();
+        }
+        
         [Key]
         public int Id { get; set; }
         public EmailTemplateEnum emailCode { get; set; }
@@ -25,7 +30,7 @@ namespace AutoLegalTracker_API.Models
 
         // Creating an email object and indicating which property is the FK
         [ForeignKey("EmailTemplateId")]
-        public virtual EmailTemplate Email { get; set; }
+        public virtual EmailTemplate EmailTemplate { get; set; }
     }
 
     public enum EmailTemplateEnum

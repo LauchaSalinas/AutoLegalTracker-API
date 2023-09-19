@@ -119,6 +119,28 @@ namespace AutoLegalTracker_API.Controllers
                 return BadRequest(new { error = errorMsg });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> test()
+        {
+            try
+            {
+                await _actionBusiness.RunActionsToNewNotifications();
+
+                return new OkResult();
+            }
+            catch (ApplicationException appex)
+            {
+                return BadRequest(new { error = appex });
+            }
+            catch (Exception ex)
+            {
+                //save to log table
+                var errorMsgToTable = ex;
+                var errorMsg = String.Concat("Ha ocurrido un error a las ", DateTime.Now.ToString());
+                return BadRequest(new { error = errorMsg });
+            }
+        }
     }
 
     

@@ -3,6 +3,10 @@ namespace AutoLegalTracker_API.Models
 {
 	public class User
 	{
+		public User ()
+		{
+			LegalCases = new HashSet<LegalCase>();
+		}
         public int Id { get; set; }
 		public int UserTypeId { get; set; }
 		public virtual UserType userType { get; set; } // Navigation property
@@ -19,17 +23,21 @@ namespace AutoLegalTracker_API.Models
 		public DateTime GoogleOAuth2TokenCreatedAt { get; set; }
 		public string? GoogleOAuth2IdToken { get; set; }
 
-		public virtual List<LegalCase> LegalCases { get; set; } = new List<LegalCase>();
+		public virtual ICollection<LegalCase> LegalCases { get; set; }
     }
 
     public class UserType
     {
+		public UserType()
+		{
+			Users = new HashSet<User>();
+		}
 		public int Id { get; set; }
         public string Name { get; set; }
 		public string? Description { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public DateTime? UpdatedAt { get; set; }
-		public virtual List<User> Users { get; set; } = new List<User>(); // navigation property
+		public virtual ICollection<User> Users { get; set; } // navigation property
     }
 }
 

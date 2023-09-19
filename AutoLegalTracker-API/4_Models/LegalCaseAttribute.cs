@@ -7,7 +7,9 @@ public class LegalCaseAttribute
 {
     public LegalCaseAttribute()
     {
-
+        LegalCase = new HashSet<LegalCase>();
+        LegalCaseActionsWhereItsAdded = new HashSet<LegalCaseAction>();
+        LegalCaseActionsWhereItsDeleted = new HashSet<LegalCaseAction>();
     }
 
     public int Id { get; set; }
@@ -16,22 +18,16 @@ public class LegalCaseAttribute
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? ExpiresAt { get; set; }
-    [ForeignKey("LegalCaseAttributeId")]
+    /// <summary>
+    /// Reference to the LegalCaseAttribute that will be added to the LegalCase when this attribute expires
+    /// EF Self Reference
+    /// </summary>
+    [ForeignKey("LegalCaseAttribute")]
     public int? AttributeToAddWhenExpiredId { get; set; }
     public virtual LegalCaseAttribute? AttributeToAddWhenExpired { get; set; } // Navigation property
-    public int LegalCaseId { get; set; }
-    public virtual LegalCase LegalCase { get; set; } // Navigation property
-}
+    public virtual ICollection<LegalCase> LegalCase { get; set; } // Navigation property
 
-public class LegalCaseAttribute_LegalCaseCondition
-{
-    public int Id { get; set; }
-    public int LegalCaseAttributeId { get; set; }
-    public LegalCaseAttribute LegalCaseAttribute { get; set; }
-
-    public int LegalCaseConditionId { get; set; }
-    public LegalCaseCondition LegalCaseCondition { get; set; }
-
-    public bool MustBePresent { get; set; } // true = attribute must be present, false = attribute must not be present
+    public ICollection<LegalCaseAction> LegalCaseActionsWhereItsAdded { get; set; }
+    public ICollection<LegalCaseAction> LegalCaseActionsWhereItsDeleted { get; set; }
 }
 

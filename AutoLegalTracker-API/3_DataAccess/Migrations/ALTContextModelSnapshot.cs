@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AutoLegalTracker_API.Migrations
+namespace AutoLegalTracker_API._3_DataAccess.Migrations
 {
     [DbContext(typeof(ALTContext))]
     partial class ALTContextModelSnapshot : ModelSnapshot
@@ -233,14 +233,14 @@ namespace AutoLegalTracker_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("NotificationConditionId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("NotificationCondtionId")
+                    b.Property<int?>("NotificationConditionId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -252,56 +252,9 @@ namespace AutoLegalTracker_API.Migrations
 
                     b.HasIndex("NotificationConditionId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("LegalCaseActions");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAction_LegalCaseAttribute", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("Add")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LegalCaseActionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LegalCaseAttributeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LegalCaseActionId");
-
-                    b.HasIndex("LegalCaseAttributeId");
-
-                    b.ToTable("LegalCaseAction_LegalCaseAttribute");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAction_UserType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("LegalCaseActionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LegalCaseActionId");
-
-                    b.HasIndex("UserTypeId");
-
-                    b.ToTable("LegalCaseAction_UserType");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAttribute", b =>
@@ -312,7 +265,7 @@ namespace AutoLegalTracker_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AttributeToAddWhenExpiredId")
+                    b.Property<int?>("AttributeToAddWhenExpiredId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -324,7 +277,7 @@ namespace AutoLegalTracker_API.Migrations
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LegalCaseId")
+                    b.Property<int?>("LegalCaseConditionId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -338,35 +291,9 @@ namespace AutoLegalTracker_API.Migrations
 
                     b.HasIndex("AttributeToAddWhenExpiredId");
 
-                    b.HasIndex("LegalCaseId");
-
-                    b.ToTable("LegalCaseAttributes");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAttribute_LegalCaseCondition", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("LegalCaseAttributeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LegalCaseConditionId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("MustBePresent")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LegalCaseAttributeId");
-
                     b.HasIndex("LegalCaseConditionId");
 
-                    b.ToTable("LegalCaseAttribute_LegalCaseCondition");
+                    b.ToTable("LegalCaseAttributes");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseCondition", b =>
@@ -424,6 +351,9 @@ namespace AutoLegalTracker_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<bool>("ActionHasBeenTaken")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -462,6 +392,10 @@ namespace AutoLegalTracker_API.Migrations
                     b.HasIndex("LegalAutomationId");
 
                     b.HasIndex("LegalCaseId");
+
+                    b.HasIndex("MedicalAppointmentId")
+                        .IsUnique()
+                        .HasFilter("[MedicalAppointmentId] IS NOT NULL");
 
                     b.ToTable("LegalNotifications");
                 });
@@ -524,9 +458,6 @@ namespace AutoLegalTracker_API.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LegalNotificationId")
-                        .IsUnique();
 
                     b.ToTable("MedicalAppointments");
                 });
@@ -701,6 +632,9 @@ namespace AutoLegalTracker_API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("LegalCaseActionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -709,6 +643,8 @@ namespace AutoLegalTracker_API.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LegalCaseActionId");
 
                     b.ToTable("UserTypes");
                 });
@@ -735,15 +671,60 @@ namespace AutoLegalTracker_API.Migrations
                     b.ToTable("WeatherForecasts");
                 });
 
+            modelBuilder.Entity("LegalCaseAttributesToAdd", b =>
+                {
+                    b.Property<int>("LegalCaseActionsWhereItsAddedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LegalCaseAttributesToAddId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LegalCaseActionsWhereItsAddedId", "LegalCaseAttributesToAddId");
+
+                    b.HasIndex("LegalCaseAttributesToAddId");
+
+                    b.ToTable("LegalCaseAttributesToAdd");
+                });
+
+            modelBuilder.Entity("LegalCaseAttributesToDelete", b =>
+                {
+                    b.Property<int>("LegalCaseActionsWhereItsDeletedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LegalCaseAttributesToDeleteId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LegalCaseActionsWhereItsDeletedId", "LegalCaseAttributesToDeleteId");
+
+                    b.HasIndex("LegalCaseAttributesToDeleteId");
+
+                    b.ToTable("LegalCaseAttributesToDelete");
+                });
+
+            modelBuilder.Entity("LegalCaseLegalCaseAttribute", b =>
+                {
+                    b.Property<int>("LegalCaseAttributesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LegalCaseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LegalCaseAttributesId", "LegalCaseId");
+
+                    b.HasIndex("LegalCaseId");
+
+                    b.ToTable("LegalCaseLegalCaseAttribute");
+                });
+
             modelBuilder.Entity("AutoLegalTracker_API.Models.EmailLog", b =>
                 {
-                    b.HasOne("AutoLegalTracker_API.Models.EmailTemplate", "Email")
+                    b.HasOne("AutoLegalTracker_API.Models.EmailTemplate", "EmailTemplate")
                         .WithMany("EmailLogs")
                         .HasForeignKey("EmailTemplateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Email");
+                    b.Navigation("EmailTemplate");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalAutomation", b =>
@@ -784,8 +765,12 @@ namespace AutoLegalTracker_API.Migrations
 
                     b.HasOne("AutoLegalTracker_API.Models.NotificationCondition", "NotificationCondition")
                         .WithMany()
-                        .HasForeignKey("NotificationConditionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("NotificationConditionId");
+
+                    b.HasOne("AutoLegalTracker_API.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("EmailTemplate");
@@ -795,82 +780,21 @@ namespace AutoLegalTracker_API.Migrations
                     b.Navigation("LegalResponseTemplate");
 
                     b.Navigation("NotificationCondition");
-                });
 
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAction_LegalCaseAttribute", b =>
-                {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAction", "LegalCaseAction")
-                        .WithMany("LegalCaseAttributesToAddOrDelete")
-                        .HasForeignKey("LegalCaseActionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", "LegalCaseAttribute")
-                        .WithMany()
-                        .HasForeignKey("LegalCaseAttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LegalCaseAction");
-
-                    b.Navigation("LegalCaseAttribute");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAction_UserType", b =>
-                {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAction", "LegalCaseAction")
-                        .WithMany("UserTypeAllowedToUseAction")
-                        .HasForeignKey("LegalCaseActionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AutoLegalTracker_API.Models.UserType", "UserType")
-                        .WithMany()
-                        .HasForeignKey("UserTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LegalCaseAction");
-
-                    b.Navigation("UserType");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAttribute", b =>
                 {
                     b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", "AttributeToAddWhenExpired")
                         .WithMany()
-                        .HasForeignKey("AttributeToAddWhenExpiredId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AttributeToAddWhenExpiredId");
 
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCase", "LegalCase")
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseCondition", null)
                         .WithMany("LegalCaseAttributes")
-                        .HasForeignKey("LegalCaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("LegalCaseConditionId");
 
                     b.Navigation("AttributeToAddWhenExpired");
-
-                    b.Navigation("LegalCase");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAttribute_LegalCaseCondition", b =>
-                {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", "LegalCaseAttribute")
-                        .WithMany()
-                        .HasForeignKey("LegalCaseAttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseCondition", "LegalCaseCondition")
-                        .WithMany("AttributeConditionRelationships")
-                        .HasForeignKey("LegalCaseConditionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LegalCaseAttribute");
-
-                    b.Navigation("LegalCaseCondition");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalNotification", b =>
@@ -885,18 +809,13 @@ namespace AutoLegalTracker_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AutoLegalTracker_API.Models.MedicalAppointment", "MedicalAppointment")
+                        .WithOne("LegalNotification")
+                        .HasForeignKey("AutoLegalTracker_API.Models.LegalNotification", "MedicalAppointmentId");
+
                     b.Navigation("LegalCase");
-                });
 
-            modelBuilder.Entity("AutoLegalTracker_API.Models.MedicalAppointment", b =>
-                {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalNotification", "LegalNotification")
-                        .WithOne("MedicalAppointment")
-                        .HasForeignKey("AutoLegalTracker_API.Models.MedicalAppointment", "LegalNotificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LegalNotification");
+                    b.Navigation("MedicalAppointment");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.RequestedAnalysis", b =>
@@ -932,6 +851,58 @@ namespace AutoLegalTracker_API.Migrations
                     b.Navigation("userType");
                 });
 
+            modelBuilder.Entity("AutoLegalTracker_API.Models.UserType", b =>
+                {
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAction", null)
+                        .WithMany("UserTypes")
+                        .HasForeignKey("LegalCaseActionId");
+                });
+
+            modelBuilder.Entity("LegalCaseAttributesToAdd", b =>
+                {
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAction", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseActionsWhereItsAddedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseAttributesToAddId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LegalCaseAttributesToDelete", b =>
+                {
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAction", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseActionsWhereItsDeletedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseAttributesToDeleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LegalCaseLegalCaseAttribute", b =>
+                {
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseAttributesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AutoLegalTracker_API.Models.LegalCase", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AutoLegalTracker_API.Models.EmailTemplate", b =>
                 {
                     b.Navigation("EmailLogs");
@@ -944,8 +915,6 @@ namespace AutoLegalTracker_API.Migrations
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCase", b =>
                 {
-                    b.Navigation("LegalCaseAttributes");
-
                     b.Navigation("LegalNotifications");
 
                     b.Navigation("RequestedAnalyses");
@@ -955,19 +924,17 @@ namespace AutoLegalTracker_API.Migrations
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAction", b =>
                 {
-                    b.Navigation("LegalCaseAttributesToAddOrDelete");
-
-                    b.Navigation("UserTypeAllowedToUseAction");
+                    b.Navigation("UserTypes");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseCondition", b =>
                 {
-                    b.Navigation("AttributeConditionRelationships");
+                    b.Navigation("LegalCaseAttributes");
                 });
 
-            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalNotification", b =>
+            modelBuilder.Entity("AutoLegalTracker_API.Models.MedicalAppointment", b =>
                 {
-                    b.Navigation("MedicalAppointment")
+                    b.Navigation("LegalNotification")
                         .IsRequired();
                 });
 

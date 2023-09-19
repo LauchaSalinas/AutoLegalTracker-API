@@ -4,7 +4,7 @@
     {
         public LegalCaseCondition()
         {
-
+            LegalCaseAttributes = new HashSet<LegalCaseAttribute>();
         }
 
         public int Id { get; set; }
@@ -12,7 +12,10 @@
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public virtual List<LegalCaseAttribute_LegalCaseCondition> AttributeConditionRelationships { get; set; } = new List<LegalCaseAttribute_LegalCaseCondition>();
+        /// <summary>
+        /// Attributes that the legal case must have in order to trigger the action
+        /// </summary>
+        public virtual ICollection<LegalCaseAttribute> LegalCaseAttributes { get; set; }
         public bool ExpensesShouldBePaid { get; set; } = false;
         public string? JurisdictionContains { get; set; }
         public string? JurisdictionDoesNotContain { get; set; }
