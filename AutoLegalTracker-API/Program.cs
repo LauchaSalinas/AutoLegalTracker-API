@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz.Impl;
+using Quartz;
 
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
-using Quartz;
+using AutoLegalTracker_API.Common;
 
 namespace AutoLegalTracker_API
 {
@@ -30,9 +31,15 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<EmailBusiness>();
             builder.Services.AddTransient<CalendarBusiness>();
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
+<<<<<<< HEAD
             builder.Services.AddTransient<CaseBusiness>();
             builder.Services.AddTransient<LegalCaseDataAccessAsync>(); 
+=======
+            builder.Services.AddTransient<ActionBusiness>();
+>>>>>>> e865fb05bd40232e451e73023b6452373f58b163
             builder.Services.AddTransient<ScrapBusiness>();
+            builder.Services.AddTransient<ConditionBusiness>();
+
             builder.Services.AddTransient<ScrapJob>();
 
             // Add dependency injection to the Services Layer
@@ -43,14 +50,24 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<EmailService>();
             builder.Services.AddTransient<PuppeteerService>();
 
+<<<<<<< HEAD
             // TODO Add dependency injection to the Data Access Layer
+=======
+            // Add dependency injection to the Data Access Layer
+>>>>>>> e865fb05bd40232e451e73023b6452373f58b163
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
             builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
             builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
             builder.Services.AddScoped<IDataAccesssAsync<Models.Calendar>, DataAccessAsync<Models.Calendar>>();
+<<<<<<< HEAD
             builder.Services.AddScoped<IDataAccesssAsync<LegalCase>, DataAccessAsync<LegalCase>>();
+=======
+            builder.Services.AddScoped<ActionDataAccess>(); // check if this is neccesary
+            builder.Services.AddScoped<LegalCaseDataAccessAsync>(); // check if this is neccesary
+            builder.Services.AddScoped<LegalNotificationDataAccess>(); // check if this is neccesary
+>>>>>>> e865fb05bd40232e451e73023b6452373f58b163
 
             builder.Services.AddSingleton(provider =>
             {
@@ -74,6 +91,29 @@ namespace AutoLegalTracker_API
                 options.UseSqlServer(connectionString);
             });
 
+            #region Quartz
+
+            // builder.Services.AddQuartz(q =>
+            // {
+            //     q.SchedulerId = "Scheduler-Core";
+            //     q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+            //     q.ScheduleJob<ScrapJob>(trigger => trigger
+            //         .WithIdentity("Combined Configuration Trigger")
+            //         .StartNow()
+            //         .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
+            //         .WithDescription("my awesome trigger configured for a job with single call")
+            //     );
+            // });
+
+            // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
+            // builder.Services.AddQuartzHostedService(options =>
+            // {
+            //     // when shutting down we want jobs to complete gracefully
+            //     options.WaitForJobsToComplete = true;
+            // });
+
+            #endregion Quartz
+
             #region CORS and Security
 
             builder.Services.AddCors(options =>
@@ -87,6 +127,7 @@ namespace AutoLegalTracker_API
                 });
             });
 
+<<<<<<< HEAD
             //builder.Services.AddQuartz(q =>
             //{
             //    q.SchedulerId = "Scheduler-Core";
@@ -106,6 +147,8 @@ namespace AutoLegalTracker_API
             //    options.WaitForJobsToComplete = true;
             //});
 
+=======
+>>>>>>> e865fb05bd40232e451e73023b6452373f58b163
 
             // Add Authentication
             builder.Services.AddAuthentication(options =>
@@ -153,7 +196,17 @@ namespace AutoLegalTracker_API
                 Context.Database.Migrate();
 
             }
-            
+
+
+            if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
+                    new DatabaseStartup(Context).InitializeWithData();
+                }
+            }
+
 
             app.UseHttpsRedirection();
             app.UseCors(app => app.WithOrigins(builder.Configuration["JWT_AUDIENCE"] ?? String.Empty).AllowAnyMethod().AllowAnyHeader().AllowCredentials());

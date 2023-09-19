@@ -24,7 +24,7 @@ namespace AutoLegalTracker_API.Business
 
         #region Public Methods
         
-        public async Task<List<LegalCase>> GetCases(Models.User user)
+        public async Task<List<LegalCase>> GetCases(User user)
         {
             // get cases from database
             var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id);
@@ -81,6 +81,8 @@ namespace AutoLegalTracker_API.Business
         #endregion Public Methods
 
         #region Private Methods
+
+        private void GetActionsForCase(){}
 
         #endregion Private Methods
 

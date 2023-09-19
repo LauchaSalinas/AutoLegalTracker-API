@@ -4,6 +4,8 @@ namespace AutoLegalTracker_API.Models
 	public class User
 	{
         public int Id { get; set; }
+		public int UserTypeId { get; set; }
+		public virtual UserType userType { get; set; } // Navigation property
 		public string Sub { get; set; }
 		public string Name { get; set; }
 		public string FamilyName { get; set; }
@@ -18,6 +20,16 @@ namespace AutoLegalTracker_API.Models
 		public string? GoogleOAuth2IdToken { get; set; }
 
 		public virtual List<LegalCase> LegalCases { get; set; } = new List<LegalCase>();
+    }
+
+    public class UserType
+    {
+		public int Id { get; set; }
+        public string Name { get; set; }
+		public string? Description { get; set; }
+		public DateTime CreatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; }
+		public virtual List<User> Users { get; set; } = new List<User>(); // navigation property
     }
 }
 

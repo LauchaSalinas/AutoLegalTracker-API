@@ -26,7 +26,7 @@ namespace AutoLegalTracker_API.Business
             }
             catch (Exception ex)
             {
-                // Handle the exception
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -39,7 +39,7 @@ namespace AutoLegalTracker_API.Business
             }
             catch (Exception ex)
             {
-                // Handle the exception
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -52,7 +52,7 @@ namespace AutoLegalTracker_API.Business
             }
             catch (Exception ex)
             {
-                // Handle the exception
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -65,7 +65,7 @@ namespace AutoLegalTracker_API.Business
             }
             catch (Exception ex)
             {
-                // Handle the exception
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -78,7 +78,7 @@ namespace AutoLegalTracker_API.Business
             }
             catch (Exception ex)
             {
-                // Handle the exception
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -93,6 +93,10 @@ namespace AutoLegalTracker_API.Business
         {
             var emailTemplate = GetAllEmails().Result.FirstOrDefault(x => x.emailCode == eventCode);
 
+            if (emailTemplate == null){
+                throw new ApplicationException("Email template not found");
+            }
+                
             _emailService.sendEmail(emailTemplate, userTo);
 
             var emailLog = new EmailLog {

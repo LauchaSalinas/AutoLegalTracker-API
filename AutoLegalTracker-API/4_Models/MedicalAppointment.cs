@@ -1,4 +1,6 @@
-﻿namespace AutoLegalTracker_API.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AutoLegalTracker_API.Models
 {
     public class MedicalAppointment
     {
@@ -12,8 +14,10 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool? PatientAttended { get; set; }
+        public bool? PatientAttendedOnline { get; set; }
+        [ForeignKey("LegalNotification")]
         public int LegalNotificationId { get; set; }
-
         public virtual LegalNotification LegalNotification { get; set; } // Navigation property
+
     }
 }

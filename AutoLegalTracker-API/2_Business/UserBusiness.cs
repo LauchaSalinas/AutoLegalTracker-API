@@ -108,6 +108,12 @@ namespace AutoLegalTracker_API.Business
             User user = userList.FirstOrDefault();
             return user;
         }
+
+        public async Task<List<User>> GetAllUsers()
+        {
+            var users = await _userAccess.GetAll();
+            return users.ToList();
+        }
     }
 }
 

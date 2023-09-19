@@ -4,16 +4,18 @@ using AutoLegalTracker_API.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AutoLegalTracker_API.Migrations
+namespace AutoLegalTracker_API._3_DataAccess.Migrations
 {
     [DbContext(typeof(ALTContext))]
-    partial class ALTContextModelSnapshot : ModelSnapshot
+    [Migration("20230917053759_15_updates_to_models2")]
+    partial class _15_updates_to_models2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -312,17 +314,11 @@ namespace AutoLegalTracker_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AttributeToAddWhenExpiredId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("LegalCaseId")
                         .HasColumnType("int");
@@ -335,8 +331,6 @@ namespace AutoLegalTracker_API.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AttributeToAddWhenExpiredId");
 
                     b.HasIndex("LegalCaseId");
 
@@ -710,7 +704,7 @@ namespace AutoLegalTracker_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserTypes");
+                    b.ToTable("UserType");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.WeatherForecast", b =>
@@ -837,19 +831,11 @@ namespace AutoLegalTracker_API.Migrations
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseAttribute", b =>
                 {
-                    b.HasOne("AutoLegalTracker_API.Models.LegalCaseAttribute", "AttributeToAddWhenExpired")
-                        .WithMany()
-                        .HasForeignKey("AttributeToAddWhenExpiredId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AutoLegalTracker_API.Models.LegalCase", "LegalCase")
                         .WithMany("LegalCaseAttributes")
                         .HasForeignKey("LegalCaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AttributeToAddWhenExpired");
 
                     b.Navigation("LegalCase");
                 });
