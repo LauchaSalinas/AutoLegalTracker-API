@@ -3,7 +3,6 @@ using AutoLegalTracker_API.WebServices;
 
 using AutoLegalTracker_API.Models;
 using Microsoft.EntityFrameworkCore;
-using Google.Apis.Drive.v3.Data;
 
 namespace AutoLegalTracker_API.Business
 {
@@ -83,6 +82,13 @@ namespace AutoLegalTracker_API.Business
         #region Private Methods
 
         private void GetActionsForCase(){}
+
+        public async Task<LegalCase> GetCaseById(User user, int id)
+        {
+            // get case from database
+            var legalCase = await _legalCaseAccessGeneric.Query(legalCase => legalCase.Id == id && legalCase.UserId == user.Id);
+            return legalCase.FirstOrDefault();
+        }
 
         #endregion Private Methods
 

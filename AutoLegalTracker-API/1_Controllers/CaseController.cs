@@ -78,7 +78,6 @@ namespace AutoLegalTracker_API._1_Controllers
 
             try
             {
-<<<<<<< HEAD
                 // Obtener casos nuevos del mes
                 var newCasesInThisMonth = await _caseBusiness.GetNewCasesInThisMonth();
 
@@ -98,14 +97,6 @@ namespace AutoLegalTracker_API._1_Controllers
                 //Object Messagge Text
                 //var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
                 //var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
-=======
-                var automatedCases = await _caseBusiness.GetAutomatedCases(user);
-                var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
-                // Obtener casos nuevos del mes
-                // Obtener notificaciones sin responder
-                var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
-                var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
->>>>>>> e865fb05bd40232e451e73023b6452373f58b163
 
                 // TODO JGonzalez: seguir desde aca y revisar lo hecho previamente, revisar que los modelos se agreguen al contexto y revisar la inyeccion de dependencias
 

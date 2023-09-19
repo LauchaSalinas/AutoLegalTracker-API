@@ -31,12 +31,7 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<EmailBusiness>();
             builder.Services.AddTransient<CalendarBusiness>();
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
-<<<<<<< HEAD
-            builder.Services.AddTransient<CaseBusiness>();
-            builder.Services.AddTransient<LegalCaseDataAccessAsync>(); 
-=======
             builder.Services.AddTransient<ActionBusiness>();
->>>>>>> e865fb05bd40232e451e73023b6452373f58b163
             builder.Services.AddTransient<ScrapBusiness>();
             builder.Services.AddTransient<ConditionBusiness>();
             builder.Services.AddTransient<CaseBusiness>();
@@ -52,11 +47,7 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<EmailService>();
             builder.Services.AddTransient<PuppeteerService>();
 
-<<<<<<< HEAD
-            // TODO Add dependency injection to the Data Access Layer
-=======
             // Add dependency injection to the Data Access Layer
->>>>>>> e865fb05bd40232e451e73023b6452373f58b163
             builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<LegalCase>, DataAccessAsync<LegalCase>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
@@ -64,13 +55,9 @@ namespace AutoLegalTracker_API
             builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
             builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
             builder.Services.AddScoped<IDataAccesssAsync<Models.Calendar>, DataAccessAsync<Models.Calendar>>();
-<<<<<<< HEAD
-            builder.Services.AddScoped<IDataAccesssAsync<LegalCase>, DataAccessAsync<LegalCase>>();
-=======
             builder.Services.AddScoped<ActionDataAccess>(); // check if this is neccesary
             builder.Services.AddScoped<LegalCaseDataAccessAsync>(); // check if this is neccesary
             builder.Services.AddScoped<LegalNotificationDataAccess>(); // check if this is neccesary
->>>>>>> e865fb05bd40232e451e73023b6452373f58b163
 
             builder.Services.AddSingleton(provider =>
             {
@@ -130,7 +117,6 @@ namespace AutoLegalTracker_API
                 });
             });
 
-<<<<<<< HEAD
             //builder.Services.AddQuartz(q =>
             //{
             //    q.SchedulerId = "Scheduler-Core";
@@ -150,8 +136,6 @@ namespace AutoLegalTracker_API
             //    options.WaitForJobsToComplete = true;
             //});
 
-=======
->>>>>>> e865fb05bd40232e451e73023b6452373f58b163
 
             // Add Authentication
             builder.Services.AddAuthentication(options =>
