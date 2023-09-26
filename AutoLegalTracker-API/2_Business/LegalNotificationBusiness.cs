@@ -18,5 +18,14 @@ namespace AutoLegalTracker_API.Business
             // return cases
             return notifications;
         }
+
+        public async Task<List<LegalNotification>> GetAllNotifications(User user)
+        {
+            // get cases from database
+            var notifications = await _legalNotificationAccess.getAllNotificationsUnseen(user);
+
+            // return cases
+            return notifications;
+        }
     }
 }

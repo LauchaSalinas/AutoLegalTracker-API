@@ -43,6 +43,7 @@ namespace AutoLegalTracker_API.Business
                 user = new User
                 {
                     Id = 0,
+                   UserTypeId = 1,
                     Sub = meObject.Id,
                     Name = meObject.Name,
                     FamilyName = meObject.FamilyName,

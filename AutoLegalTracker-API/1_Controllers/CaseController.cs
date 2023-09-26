@@ -17,12 +17,14 @@ namespace AutoLegalTracker_API._1_Controllers
         private IConfiguration _configuration;
         private UserBusiness _userBusiness;
         private CaseBusiness _caseBusiness;
+        private LegalNotificationBusiness _notificationBusiness; 
 
-        public CaseController(IConfiguration configuration, UserBusiness userBusiness, CaseBusiness caseBusiness)
+        public CaseController(IConfiguration configuration, UserBusiness userBusiness, CaseBusiness caseBusiness, LegalNotificationBusiness notificationBusiness)
         {
             _configuration = configuration;
             _userBusiness = userBusiness;
             _caseBusiness = caseBusiness;
+            _notificationBusiness = notificationBusiness;
         }
 
         #endregion Constructor
@@ -68,39 +70,34 @@ namespace AutoLegalTracker_API._1_Controllers
             
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("GetDashboardStatistics")]
         public async Task<ActionResult> GetDashboardStatistics()
         {
-            //User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
-            //if (user == null)
-            //    return new BadRequestObjectResult(new { error = "User error" });
+            User user = await _userBusiness.GetUserFromCookie(HttpContext.User);
+            if (user == null)
+                return new BadRequestObjectResult(new { error = "User error" });
 
             try
             {
-                // Obtener casos nuevos del mes
-                var newCasesInThisMonth = await _caseBusiness.GetNewCasesInThisMonth();
-
-                // Obtener notificaciones sin responder
-                //var casesNotificationUnseen  = 0
-
-                return new OkObjectResult(new { newCasesInThisMonth }); ; 
-                
-
-                //return new OkObjectResult(new { , pendingEvents });
-
                 //Automated Cases
-                //var automatedCases = await _caseBusiness.GetAutomatedCases(user);
-                ////Pending Cases in the next week
-                //var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
+                var automatedCases = await _caseBusiness.GetAutomatedCases(user);
+                //Pending Cases in the next week
+                var casesWithPendingEventsNextWeek = await _caseBusiness.GetCasesWithPendingEventsNextWeek(user);
+                // New Cases in the Month
+                var newCasesInThisMonth = await _caseBusiness.GetNewCasesInThisMonth(user);
+                // Unseen Notifications
+                var casesNotificationUnseen = await _notificationBusiness.GetAllNotifications(user); 
 
                 //Object Messagge Text
-                //var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
-                //var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
+                var automated = new string($"Tienes {automatedCases.Count} casos automatizados");
+                var pendingEvents = new string($"Tienes {casesWithPendingEventsNextWeek.Count} casos con eventos pendientes para la próxima semana");
+                var newCases = new string($"Tienes {newCasesInThisMonth.Count} casos nuevos este mes");
+                var notifications = new string($"Tienes {casesNotificationUnseen.Count} notificaciones sin ver");
+
+                return new OkObjectResult(new { automated, pendingEvents, newCases, notifications }); ; 
 
                 // TODO JGonzalez: seguir desde aca y revisar lo hecho previamente, revisar que los modelos se agreguen al contexto y revisar la inyeccion de dependencias
-
-                //return new OkObjectResult( new { automated, pendingEvents } );
             }
             catch (ApplicationException appex)
             {
@@ -114,6 +111,7 @@ namespace AutoLegalTracker_API._1_Controllers
                 return BadRequest(new { error = errorMsg });
             }
         }
+
         #endregion Public Methods
     }
 }

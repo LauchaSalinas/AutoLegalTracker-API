@@ -22,24 +22,24 @@ namespace AutoLegalTracker_API.Business
         #endregion Constructor
 
         #region Public Methods
-        
+
         public async Task<List<LegalCase>> GetCases(User user)
         {
             // get cases from database
-            var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id);
+            var cases = await _legalCaseDataAccess.GetCasesByUserId(user);
 
             // return cases
-            return cases.ToList();
+            return cases;
         }
 
-        public async Task<List<LegalCase>> GetAutomatedCases(Models.User user)
+        public async Task<List<LegalCase>> GetAutomatedCases(User user)
         {
             // get cases from database
             var cases = await _legalCaseAccessGeneric.Query(legalCase => legalCase.UserId == user.Id && legalCase.ClosedAt == null);
             return cases.ToList();
         }
 
-        public async Task<List<LegalCase>> GetCasesWithPendingEventsNextWeek(Models.User user)
+        public async Task<List<LegalCase>> GetCasesWithPendingEventsNextWeek(User user)
         {
             try
             {
@@ -58,22 +58,22 @@ namespace AutoLegalTracker_API.Business
             }
         }
 
-        public async Task<List<LegalCase>> GetNewCasesInThisMonth()
+        public async Task<List<LegalCase>> GetNewCasesInThisMonth(User user)
         {
             try
             {
                 //TODO terminar metodo nuevo casos del mes
-                // First day month
-                var FirstDayOfThisMonth = DateTime.Now.Month;
+                // Current Month
+                var CurrentMonth = DateTime.Now.Month;
 
-
-                var casesCreatedInThisMonth = await _legalCaseAccessGeneric.Query(legalCase => legalCase.CreatedAt.Month == FirstDayOfThisMonth); 
+                //Checking 
+                var casesCreatedInThisMonth = await _legalCaseAccessGeneric.Query(legalCase => legalCase.CreatedAt.Month == CurrentMonth && legalCase.UserId == user.Id); 
 
                 return casesCreatedInThisMonth.ToList();
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error while getting cases with pending events for next week.", ex);
+                throw new ApplicationException("Error while getting cases with the number of new cases in this month.", ex);
             }
         }
 

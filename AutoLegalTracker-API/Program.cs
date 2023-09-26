@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz.Impl;
 using Quartz;
 
+using System.Text.Json.Serialization;
+
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
 using AutoLegalTracker_API.WebServices;
 using AutoLegalTracker_API.DataAccess;
 using AutoLegalTracker_API.Common;
+
 
 namespace AutoLegalTracker_API
 {
@@ -19,8 +22,10 @@ namespace AutoLegalTracker_API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            // Evitando referencia circular
             builder.Services.AddControllers();
+                //.AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 
             #region Dependency Injection
 
@@ -184,15 +189,15 @@ namespace AutoLegalTracker_API
             }
 
 
-            // if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
-            // {
-            //     using (var scope = app.Services.CreateScope())
-            //     {
-            //         var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
-            //         var actionBusiness = scope.ServiceProvider.GetRequiredService<ActionBusiness>();
-            //         new DatabaseStartup(Context, actionBusiness).InitializeWithData();
-            //     }
-            // }
+            //if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+            //{
+            //    using (var scope = app.Services.CreateScope())
+            //    {
+            //        var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
+            //        var actionBusiness = scope.ServiceProvider.GetRequiredService<ActionBusiness>();
+            //        new DatabaseStartup(Context, actionBusiness).InitializeWithData();
+            //    }
+            //}
 
 
             app.UseHttpsRedirection();

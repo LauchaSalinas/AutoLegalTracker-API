@@ -55,6 +55,33 @@ namespace AutoLegalTracker_API.DataAccess
             return await _context.LegalCases.SingleAsync(legalCase => legalCase.Id == legalCaseId);
         }
 
+        public async Task<List<LegalCase>> GetCasesByUserId(User user)
+        {
+            //Disabling Eager Loading with AsNoTracking
+            return await _context.LegalCases
+                .Where(legalCase => legalCase.UserId == user.Id && legalCase.ClosedAt == null)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        //public async Task<List<LegalCase>> getAllNotificationsUnseen(User user)
+        //{
+        //    //Disabling Eager Loading with AsNoTracking
+        //    return await _context.LegalCases
+        //        .Where(legalCase => legalCase.UserId == user.Id && legalCase.ClosedAt == null)
+        //        .Include(legalCase => legalCase.)
+                
+        //        .ToListAsync();
+        //}
+
+        /*
+           SELECT COUNT(LegalNotifications.Id)
+           FROM LegalNotifications, LegalCases, Users
+           WHERE LegalNotifications.LegalCaseId = LegalCases.Id AND
+                 LegalCases.UserId = Users.Id AND
+                 UserId = 5
+           GROUP BY LegalCases.Id 
+        */
         // Other methods for LegalCase entity using _context
     }
 }
