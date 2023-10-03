@@ -1,44 +1,132 @@
 ﻿using AutoLegalTracker_API.Business;
+using AutoLegalTracker_API.DataAccess;
 using Quartz;
-using System.Runtime.CompilerServices;
 
-public class ScrapJob : IJob
+namespace AutoLegalTracker_API.Models
 {
-    private readonly ScrapBusiness _scrapBusiness;
-    private readonly ActionBusiness _actionBusiness;
-    public ScrapJob(ScrapBusiness scrapBusiness, ActionBusiness actionBusiness)
+    [DisallowConcurrentExecution]
+    public class ScrapJob : IJob
     {
-        _scrapBusiness = scrapBusiness;
-        _actionBusiness = actionBusiness;
-    }
-    public async Task Execute(IJobExecutionContext context)
-    {
-        // CheckNewCasesJob
-        Console.WriteLine("CheckNewCasesJob executed at: " + DateTime.Now);
-        try
+        private readonly ScrapBusiness _scrapBusiness;
+        private readonly ActionBusiness _actionBusiness;
+        private readonly LegalCaseDataAccessAsync _legalCaseDataAccess;
+        private readonly LegalNotificationDataAccess _legalNotificationDataAccess;
+        private readonly UserDataAccess _userDataAccess;
+        public ScrapJob(ScrapBusiness scrapBusiness, ActionBusiness actionBusiness, LegalCaseDataAccessAsync legalCaseDataAccess, LegalNotificationDataAccess legalNotificationDataAccess, UserDataAccess userDataAccess)
         {
-            await _scrapBusiness.CheckNewCases();
-            Console.WriteLine("CheckNewCasesJob finished at: " + DateTime.Now);
+            _scrapBusiness = scrapBusiness;
+            _actionBusiness = actionBusiness;
+            _legalCaseDataAccess = legalCaseDataAccess;
+            _legalNotificationDataAccess = legalNotificationDataAccess;
+            _userDataAccess = userDataAccess;
         }
-        catch (Exception ex)
+        public async Task Execute(IJobExecutionContext context)
         {
-            Console.WriteLine(ex.ToString());
-        }
+            // CheckNewCasesJob
+            Console.WriteLine("CheckNewCasesJob executed at: " + DateTime.Now);
+            try
+            {
+                //await _scrapBusiness.CheckNewCases();
+                
+                IEnumerable<User> usersToScrap = await _userDataAccess.GetUsersToScrapAsync();
+                foreach (var user in usersToScrap)
+                {
+                    try
+                    {
+                        await _scrapBusiness.LogIn(user);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        throw;
+                    }
 
-        // CheckForActionsForNewNotificationsJob
-        try
-        {
-            await _actionBusiness.RunActionsToNewNotifications();
-            Console.WriteLine("CheckForActionsForNewNotifications finished at: " + DateTime.Now);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
+                    // try
+                    // {
+                    //     var lastScrappedLegalCase = await _legalCaseDataAccess.GetLastScrappedLegalCase(user.Id);
+                    //     var lastScrappedPage = user.LastScrappedPage;
+                    //     lastScrappedLegalCase = lastScrappedLegalCase ?? new LegalCase { CaseNumber = "0" };
+                    //     (IEnumerable<LegalCase> legalCasesToAdd, var newLastScrappedPage) = await _scrapBusiness.ScrapUserGetNewCases(user, lastScrappedLegalCase.CaseNumber, lastScrappedPage);
+                    //     await _legalCaseDataAccess.AddRangeAsync(legalCasesToAdd);
+                    //     await _userDataAccess.UpdateLastScrappedPage(user, newLastScrappedPage);
+                    // }
+                    // catch(Exception ex)
+                    // {
+                    //     Console.WriteLine(ex.ToString());
+                    //     throw;
+                    //     // TODO handle TargetClosedException and other exceptions
+                    // }
+                    
+                    try
+                    {
+                        IEnumerable<LegalCase> legalCasesToUpdate = await _legalCaseDataAccess.GetCasesToScrap(user.Id);
+                        foreach (var legalCase in legalCasesToUpdate)
+                        {
+                            var lastNotification = await _legalNotificationDataAccess.GetLastNotification(legalCase.Id);
+                            try{
+                                var legalNotificationsToAdd = await _scrapBusiness.ScrapCaseGetNewNotifications(legalCase, lastNotification);
+                                await _legalNotificationDataAccess.AddRangeAsync(legalNotificationsToAdd);
+                                // update last scrapped at
+                                legalCase.LastScrappedAt = DateTime.Now;
+                                await _legalCaseDataAccess.UpdateLastScrappedAt(legalCase);
+                                Console.WriteLine($"Caso cargado {legalCase.Id} ");
 
-    }
-    static async Task EmulateAsyncMethod(int secondsDelay)
-    {
-        await Task.Delay(secondsDelay*1000);
+                            }
+                            catch(Exception ex)
+                            {
+                                Console.WriteLine($"Error de carga caso {legalCase.Id} " + ex.ToString());
+                            }
+                            
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        throw;
+                    }
+
+                    try
+                    {
+                        IEnumerable<LegalCase> legalCasesWithEmptyNotifications = await _legalCaseDataAccess.GetCasesWithEmptyNotifications();
+                        foreach (var legalCase in legalCasesWithEmptyNotifications)
+                        {
+                            var legalNotificationsToFill = await _legalNotificationDataAccess.GetEmptyNotifications(legalCase.Id);
+                            var legalNotificationsToUpdate = await _scrapBusiness.ScrapNotificationsUpdateContent(legalNotificationsToFill);
+                            await _legalNotificationDataAccess.UpdateRangeAsync(legalNotificationsToUpdate);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        throw;
+                    }
+                    await _scrapBusiness.LogOut();
+                }
+                
+
+                Console.WriteLine("CheckNewCasesJob finished at: " + DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            // // CheckForActionsForNewNotificationsJob
+            // try
+            // {
+            //     await _actionBusiness.RunActionsToNewNotifications();
+            //     Console.WriteLine("CheckForActionsForNewNotifications finished at: " + DateTime.Now);
+            // }
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine(ex.ToString());
+            // }
+
+        }
+        static async Task EmulateAsyncMethod(int secondsDelay)
+        {
+            await Task.Delay(secondsDelay*1000);
+        }
     }
 }
+

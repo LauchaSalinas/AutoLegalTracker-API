@@ -9,8 +9,6 @@ namespace AutoLegalTracker_API.DataAccess
         {
 
         }
-        public DbSet<WeatherForecast> WeatherForecasts { get; set; }
-        // Indicando que la BD tiene una tabla llamada Emails
         public DbSet<EmailTemplate> Emails { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<User> Users { get; set; }
@@ -25,6 +23,7 @@ namespace AutoLegalTracker_API.DataAccess
         public DbSet<NotificationCondition> NotificationConditions { get; set; }
         public DbSet<RequestedAnalysis> RequestedAnalyses { get; set; }
         public DbSet<RequestedCourtOrder> RequestedCourtOrders { get; set; }
+        public DbSet<NotificationReference> NotificationReferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

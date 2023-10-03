@@ -25,5 +25,44 @@ namespace AutoLegalTracker_API.DataAccess
                        notifications.LegalCase.UserId == user.Id)
                 .ToListAsync();
         }
+
+        public async Task AddRangeAsync(IEnumerable<LegalNotification> legalNotificationsToAdd)
+        {
+            _altContext.AddRangeAsync(legalNotificationsToAdd);
+            await _altContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<LegalNotification> legalNotificationsToUpdate)
+        {
+            _altContext.UpdateRange(legalNotificationsToUpdate);
+            await _altContext.SaveChangesAsync();
+        }
+
+        public async Task<LegalNotification> GetLastNotification(int CaseId)
+        {
+            return await _altContext.LegalNotifications
+                .Where(x => x.LegalCaseId == CaseId)
+                .OrderByDescending(x => x.NotificationDate)
+                .ThenBy(x => x.CreatedAt)
+                .FirstOrDefaultAsync();
+        }
+
+        internal async Task<IEnumerable<LegalNotification>> GetNotificationsToFill()
+        {
+            return await _altContext.LegalNotifications
+                .Where(x => x.Body == null)
+                .Take(500).ToListAsync();
+        }
+
+        internal async Task<IEnumerable<LegalNotification>> GetEmptyNotifications(int legalCaseId)
+        {
+            return await _altContext.LegalNotifications
+                    .Where(
+                        ln => ln.LegalCaseId == legalCaseId 
+                        && ln.Body == null
+                        // && ln.NotificationDate > DateTime.Now.AddDays(-1)
+                    )
+                    .ToListAsync();
+        }
     }
 }

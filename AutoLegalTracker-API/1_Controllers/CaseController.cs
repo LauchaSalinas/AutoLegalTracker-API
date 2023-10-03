@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 
-namespace AutoLegalTracker_API._1_Controllers
+namespace AutoLegalTracker_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

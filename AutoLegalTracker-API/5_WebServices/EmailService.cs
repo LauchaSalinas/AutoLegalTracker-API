@@ -57,11 +57,13 @@ namespace AutoLegalTracker_API.Services
 
         public void createSmptClient()
         {
-            _smtpClient = new SmtpClient(_host, _port);
-            _smtpClient.EnableSsl = _enableSsl;
-            _smtpClient.Port = _port;
-            _smtpClient.DeliveryMethod = _deliveryMethod;
-            _smtpClient.Credentials = new NetworkCredential(_userFrom, _passwordApp);
+            _smtpClient = new SmtpClient(_host, _port)
+            {
+                EnableSsl = _enableSsl,
+                Port = _port,
+                DeliveryMethod = _deliveryMethod,
+                Credentials = new NetworkCredential(_userFrom, _passwordApp)
+            };
         }
     }
 

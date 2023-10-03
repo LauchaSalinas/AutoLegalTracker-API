@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Globalization;
-using System.Security.Claims;
 
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;

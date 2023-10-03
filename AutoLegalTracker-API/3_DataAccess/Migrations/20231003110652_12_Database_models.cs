@@ -103,21 +103,6 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WeatherForecasts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TemperatureC = table.Column<int>(type: "int", nullable: false),
-                    Summary = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WeatherForecasts", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "EmailLogs",
                 columns: table => new
                 {
@@ -326,7 +311,9 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                     GoogleOAuth2AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GoogleOAuth2TokenExpiration = table.Column<long>(type: "bigint", nullable: false),
                     GoogleOAuth2TokenCreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    GoogleOAuth2IdToken = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    GoogleOAuth2IdToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastScrappedPage = table.Column<int>(type: "int", nullable: false),
+                    LastScrappedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -347,16 +334,18 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     Caption = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Jurisdiction = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ClosedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastScrappedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     PossibleCourtDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CaseNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CaseNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ExpenseAdvances = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ExpenseAdvancesPaid = table.Column<bool>(type: "bit", nullable: false),
-                    LegalCaseHonorarium = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    LegalCaseHonorarium = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ScrapUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -399,16 +388,21 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NotificationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ActionHasBeenTaken = table.Column<bool>(type: "bit", nullable: false),
                     LegalCaseId = table.Column<int>(type: "int", nullable: false),
                     Read = table.Column<bool>(type: "bit", nullable: false),
                     MedicalAppointmentId = table.Column<int>(type: "int", nullable: true),
-                    To = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    From = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NotificationType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    From = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    To = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Body = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Observation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ScrapUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Signed = table.Column<bool>(type: "bit", nullable: false),
                     LegalAutomationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -472,6 +466,27 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         name: "FK_RequestedCourtOrders_LegalCases_LegalCaseId",
                         column: x => x.LegalCaseId,
                         principalTable: "LegalCases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NotificationReferences",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LegalNotificationId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificationReferences", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotificationReferences_LegalNotifications_LegalNotificationId",
+                        column: x => x.LegalNotificationId,
+                        principalTable: "LegalNotifications",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -559,6 +574,11 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                 filter: "[MedicalAppointmentId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NotificationReferences_LegalNotificationId",
+                table: "NotificationReferences",
+                column: "LegalNotificationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RequestedAnalyses_LegalCaseId",
                 table: "RequestedAnalyses",
                 column: "LegalCaseId");
@@ -618,7 +638,7 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                 name: "LegalCaseLegalCaseAttribute");
 
             migrationBuilder.DropTable(
-                name: "LegalNotifications");
+                name: "NotificationReferences");
 
             migrationBuilder.DropTable(
                 name: "RequestedAnalyses");
@@ -627,19 +647,19 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                 name: "RequestedCourtOrders");
 
             migrationBuilder.DropTable(
-                name: "WeatherForecasts");
+                name: "LegalCaseAttributes");
 
             migrationBuilder.DropTable(
-                name: "LegalCaseAttributes");
+                name: "LegalNotifications");
 
             migrationBuilder.DropTable(
                 name: "LegalAutomations");
 
             migrationBuilder.DropTable(
-                name: "MedicalAppointments");
+                name: "LegalCases");
 
             migrationBuilder.DropTable(
-                name: "LegalCases");
+                name: "MedicalAppointments");
 
             migrationBuilder.DropTable(
                 name: "Emails");

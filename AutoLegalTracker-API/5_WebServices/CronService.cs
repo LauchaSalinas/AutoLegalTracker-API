@@ -1,5 +1,6 @@
 ﻿using System;
 using Quartz;
+using AutoLegalTracker_API.Models;
 
 namespace AutoLegalTracker_API.Services
 {

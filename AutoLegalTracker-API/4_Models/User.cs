@@ -24,6 +24,10 @@ namespace AutoLegalTracker_API.Models
 		public string? GoogleOAuth2IdToken { get; set; }
 
 		public virtual ICollection<LegalCase> LegalCases { get; set; }
+
+		public int LastScrappedPage { get; set; } = 1;
+		public DateTime? LastScrappedAt { get; set; }
+
     }
 
     public class UserType

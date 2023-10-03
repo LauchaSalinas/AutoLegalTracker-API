@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz.Impl;
 using Quartz;
 
-using System.Text.Json.Serialization;
-
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using AutoLegalTracker_API.Services;
@@ -32,7 +30,6 @@ namespace AutoLegalTracker_API
             // Add dependency injection to the Business Logic Layer
             builder.Services.AddTransient<JwtBusiness>();
             builder.Services.AddTransient<UserBusiness>();
-            builder.Services.AddTransient<WeatherForecastBusiness>();
             builder.Services.AddTransient<EmailBusiness>();
             builder.Services.AddTransient<CalendarBusiness>();
             builder.Services.AddTransient<MedicalAppointmentBusiness>();
@@ -53,7 +50,6 @@ namespace AutoLegalTracker_API
             builder.Services.AddTransient<PuppeteerService>();
 
             // Add dependency injection to the Data Access Layer
-            builder.Services.AddScoped<IDataAccesssAsync<WeatherForecast>, DataAccessAsync<WeatherForecast>>();
             builder.Services.AddScoped<IDataAccesssAsync<LegalCase>, DataAccessAsync<LegalCase>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
             builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
@@ -63,6 +59,7 @@ namespace AutoLegalTracker_API
             builder.Services.AddScoped<ActionDataAccess>(); // check if this is neccesary
             builder.Services.AddScoped<LegalCaseDataAccessAsync>(); // check if this is neccesary
             builder.Services.AddScoped<LegalNotificationDataAccess>(); // check if this is neccesary
+            builder.Services.AddScoped<UserDataAccess>(); // check if this is neccesary
 
             builder.Services.AddSingleton(provider =>
             {
@@ -73,7 +70,7 @@ namespace AutoLegalTracker_API
             
 
             // Add Quartz scheduler service
-            builder.Configuration.AddJsonFile("scrapSettings.json");
+            builder.Configuration.AddJsonFile("./0_Common/Configurations/scrapSettings.json");
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -88,24 +85,26 @@ namespace AutoLegalTracker_API
 
             #region Quartz
 
-            // builder.Services.AddQuartz(q =>
-            // {
-            //     q.SchedulerId = "Scheduler-Core";
-            //     q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
-            //     q.ScheduleJob<ScrapJob>(trigger => trigger
-            //         .WithIdentity("Combined Configuration Trigger")
-            //         .StartNow()
-            //         .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
-            //         .WithDescription("my awesome trigger configured for a job with single call")
-            //     );
-            // });
+            // make that waits for jobs to complete before running the job again
 
-            // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-            // builder.Services.AddQuartzHostedService(options =>
-            // {
-            //     // when shutting down we want jobs to complete gracefully
-            //     options.WaitForJobsToComplete = true;
-            // });
+            builder.Services.AddQuartz(q =>
+            {
+                q.SchedulerId = "Scheduler-Core";
+                q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+                q.ScheduleJob<ScrapJob>(trigger => trigger
+                    .WithIdentity("Combined Configuration Trigger")
+                    .StartNow()
+                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(5, IntervalUnit.Minute))
+                    .WithDescription("my awesome trigger configured for a job with single call")
+                );
+            });
+
+            //Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
+            builder.Services.AddQuartzHostedService(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
 
             #endregion Quartz
 
@@ -122,24 +121,38 @@ namespace AutoLegalTracker_API
                 });
             });
 
-            //builder.Services.AddQuartz(q =>
-            //{
-            //    q.SchedulerId = "Scheduler-Core";
-            //    q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
-            //    q.ScheduleJob<ScrapJob>(trigger => trigger
-            //        .WithIdentity("Combined Configuration Trigger")
-            //        .StartNow()
-            //        .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
-            //        .WithDescription("my awesome trigger configured for a job with single call")
-            //    );
-            //});
+            builder.Services.AddQuartz(q =>
+            {
+                q.SchedulerId = "Scheduler-Core";
+                q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+                q.AddJob<ScrapJob>(j => j
+                    .WithIdentity("Combined Configuration Job")
+                    .StoreDurably()
+                    .WithDescription("my awesome job configured for a single call")
+                );
+                q.AddTrigger(t => t
+                    .WithIdentity("Combined Configuration Trigger")
+                    .ForJob("Combined Configuration Job")
+                    .StartNow()
+                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
+                    .WithDescription("my awesome trigger configured for a job with single call")
+                );
+            });
 
-            //// Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-            //builder.Services.AddQuartzHostedService(options =>
-            //{
-            //    // when shutting down we want jobs to complete gracefully
-            //    options.WaitForJobsToComplete = true;
-            //});
+            // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
+            builder.Services.AddQuartzHostedService(options =>
+            {
+               // when shutting down we want jobs to complete gracefully
+               options.WaitForJobsToComplete = true;
+            });
+
+            // configure logging to filter entity framework messages
+            builder.Logging.AddFilter((provider, category, logLevel) =>
+            {
+                if(category.Contains("Microsoft.EntityFrameworkCore"))
+                    return false;
+                return true;
+            });
 
 
             // Add Authentication
@@ -185,19 +198,18 @@ namespace AutoLegalTracker_API
             {
                 var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
                 Context.Database.Migrate();
-
             }
 
 
-            //if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
-            //{
+            // if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+            // {
             //    using (var scope = app.Services.CreateScope())
             //    {
             //        var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
             //        var actionBusiness = scope.ServiceProvider.GetRequiredService<ActionBusiness>();
             //        new DatabaseStartup(Context, actionBusiness).InitializeWithData();
             //    }
-            //}
+            // }
 
 
             app.UseHttpsRedirection();

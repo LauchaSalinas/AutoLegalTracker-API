@@ -1,8 +1,6 @@
 ﻿using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API.WebServices;
 
 using AutoLegalTracker_API.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace AutoLegalTracker_API.Business
 {

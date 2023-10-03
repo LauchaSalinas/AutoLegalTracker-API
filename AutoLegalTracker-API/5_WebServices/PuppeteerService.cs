@@ -15,21 +15,39 @@ namespace AutoLegalTracker_API.WebServices
         {
             var options = new LaunchOptions
             {
-                Headless = false
+                Headless = true,
+                EnqueueAsyncMessages = true,
+                IgnoreHTTPSErrors = true,
+                // Args = new string[] { "--disable-web-security", "--disable-features=IsolateOrigins,site-per-process", "--disable-extensions", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox", "--no-zygote" },
             };
 
             Console.WriteLine("Downloading chromium");
 
             using var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
+            // await browserFetcher.DownloadAsync();
 
             _browser = await Puppeteer.LaunchAsync(options);
             
             _page = await _browser.NewPageAsync();
+            await _page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99 Safari/537.36");
+
+            _page.RequestFailed += (sender, e) =>
+            {
+                // Handle request failures
+                Console.WriteLine($"Request failed: {e.Request.Method} {e.Request.Url}");
+            };
+
+            _page.PageError += (sender, e) =>
+            {
+                // Handle page errors
+                Console.WriteLine($"Page error: {e.Message}");
+            };
+            
+
             await _page.SetViewportAsync(new ViewPortOptions
             {
-                Width = 1920,
-                Height = 1080
+                Width = 1024,
+                Height = 650
             });
             await InterceptarPedidosDeFirmaDigitalAsync();
         }
@@ -41,6 +59,11 @@ namespace AutoLegalTracker_API.WebServices
             await _page.WaitForSelectorAsync(selectorUsuario);
             await _page.TypeAsync(selectorUsuario, usuario);
             await _page.TypeAsync(selectorContra, contra);
+            await _page.WaitForTimeoutAsync(3000); // delete this later
+
+            await _page.ClickAsync("#modalMostrarMensaje > div > div > div.modal-footer > button:nth-child(3)");
+            await _page.WaitForTimeoutAsync(3000); // delete this later
+
             await _page.ClickAsync(selectorEntrar);
             await _page.WaitForTimeoutAsync(3000); // delete this later
             
@@ -63,7 +86,7 @@ namespace AutoLegalTracker_API.WebServices
             return false;
         }
 
-        public async Task<string[]> GetStringArray(string functionJS)
+        public async Task<List<String>> GetStringArray(string functionJS)
         {
             var result = await _page.EvaluateFunctionAsync(functionJS);
             List<string> list = new();
@@ -71,12 +94,39 @@ namespace AutoLegalTracker_API.WebServices
             {
                 list.Add(s.ToString());
             }
-            return list.ToArray();
+            return list;
+        }
+
+        public async Task<string> GetString(string functionJS)
+        {
+            var result = await _page.EvaluateFunctionAsync(functionJS);
+            return result.ToString();
+        }
+
+        public async Task ExecuteJs(string functionJS)
+        {
+            await _page.ExposeFunctionAsync(functionJS, () => { });
+        }
+
+                public async Task ExecuteJs(string functionJS, string param)
+        {
+            await _page.EvaluateFunctionAsync(functionJS, new object[] { param });
         }
 
         public async Task<bool> GoToUrl(string url)
         {
-            await _page.GoToAsync(url);
+            // try
+            // {
+                await _page.DisposeAsync();
+                _page = await _browser.NewPageAsync();
+                await _page.GoToAsync(url, timeout: 4000);
+            // }
+            // catch
+            // {
+            //     await _page.WaitForTimeoutAsync(30000);
+            //     await _page.ReloadAsync();
+            //     await _page.WaitForTimeoutAsync(1000);
+            // }
             if (_page != null)
             {
                 return true;
@@ -131,12 +181,20 @@ namespace AutoLegalTracker_API.WebServices
             {
                 if (e.Request.Url.Contains("version"))
                 {
+                    //log request
+                    var headersConcatenated = e.Request.Headers.Aggregate("", (current, header) => current + (header.Key + ": " + header.Value + "\n"));
+                    Console.WriteLine(
+                        "NEW REQUEST AT" + DateTime.Now.ToString("h:mm:ss.fff tt")
+                        + "\nRequest Body: " + e.Request.Url
+                        + "\nRequest Headers: " + headersConcatenated
+                    );
+
                     Console.WriteLine("request with version");
                     ResponseData response = new ResponseData
                     {
                         Status = System.Net.HttpStatusCode.OK,
                         ContentType = "application/json;charset=UTF-8",
-                        Body = "{{\"identifier\":\"f8e5f470-bcff-4c50-8fd6-ccfa2fea12d6\",\"version\":\"2.2.9.276\"}",
+                        Body = "{{\"identifier\":\"f8e5f470-bcff-4c50-8fd6-ccfa2fea12d6\",\"version\":\"2.2.9.276\"}}",
                         Headers = new Dictionary<string, object>
                         {
                             {"Access-Control-Allow-Origin", "*" },
@@ -163,7 +221,7 @@ namespace AutoLegalTracker_API.WebServices
                     {
                         Status = System.Net.HttpStatusCode.OK,
                         ContentType = "application/json;charset=UTF-8",
-                        Body = "{{\"error\" : 1 , \"errorMessage\" : \"OK\" }",
+                        Body = "{{\"error\" : 1 , \"errorMessage\" : \"OK\" }}",
                         Headers = new Dictionary<string, object>
                         {
                             {"Access-Control-Allow-Origin", "*" },
@@ -188,6 +246,16 @@ namespace AutoLegalTracker_API.WebServices
                     await e.Request.ContinueAsync();
                 }
             };
+        }
+
+        public async Task Select(string selectSelector, string optionSelector)
+        {
+            await _page.SelectAsync(selectSelector, optionSelector);
+        }
+
+        internal async Task refreshNoTimeout()
+        {
+            await _page.ReloadAsync(timeout: 0);
         }
 
         #endregion Public Methods

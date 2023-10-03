@@ -73,63 +73,63 @@ namespace AutoLegalTracker_API.Common
             _context.SaveChanges();
 
             // create a LegalCase
-            var legalCase = new LegalCase
-            {
-                Caption = "Caso 1",
-                Description = "Caso 1",
-                CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
-                User = user, // Assign the User navigation property
-                Jurisdiction = "Example Jurisdiction", // Example value for Jurisdiction
-                CaseNumber = "123ABC", // Example value for CaseNumber
-            };
-            user.LegalCases.Add(legalCase);
-            _context.LegalCases.Add(legalCase);
-            _context.SaveChanges();
+            // var legalCase = new LegalCase
+            // {
+            //     Caption = "Caso 1",
+            //     Description = "Caso 1",
+            //     CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
+            //     User = user, // Assign the User navigation property
+            //     Jurisdiction = "Example Jurisdiction", // Example value for Jurisdiction
+            //     CaseNumber = "123", // Example value for CaseNumber
+            // };
+            // user.LegalCases.Add(legalCase);
+            // _context.LegalCases.Add(legalCase);
+            // _context.SaveChanges();
 
-            // create a LegalNotification
-            var legalNotification = new LegalNotification
-            {
-                Title = "Nuevo Caso",
-                Description = "Se desgina al medico a un nuevo caso",
-                LegalCase = legalCase,
-                To = "Medico",
-                From = "Juez",
-                CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
-                ActionHasBeenTaken = false
-            };
-            legalCase.LegalNotifications.Add(legalNotification);
-            _context.LegalNotifications.Add(legalNotification);
-            _context.SaveChanges();
+            // // create a LegalNotification
+            // var legalNotification = new LegalNotification
+            // {
+            //     Title = "Nuevo Caso",
+            //     Body = "Se desgina al medico a un nuevo caso",
+            //     LegalCase = legalCase,
+            //     To = "Medico",
+            //     From = "Juez",
+            //     CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
+            //     ActionHasBeenTaken = false
+            // };
+            // legalCase.LegalNotifications.Add(legalNotification);
+            // _context.LegalNotifications.Add(legalNotification);
+            // _context.SaveChanges();
 
-            // create LegalCaseAction
-            var legalCaseAction = new LegalCaseAction
-            {
-                Name = "Action 1",
-                Description = "Action 1",
-                CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
-                User = user,
-                UserTypes = { userTypeSystem }
-            };
+            // // create LegalCaseAction
+            // var legalCaseAction = new LegalCaseAction
+            // {
+            //     Name = "Action 1",
+            //     Description = "Action 1",
+            //     CreatedAt = DateTime.UtcNow, // Example value for CreatedAt
+            //     User = user,
+            //     UserTypes = { userTypeSystem }
+            // };
 
-            var notificationConditionForNewCase = new NotificationCondition
-            {
-                TitleContains = "Nuevo Caso",
-                BodyContains = "Se desgina al medico a un nuevo caso"
-            };
+            // var notificationConditionForNewCase = new NotificationCondition
+            // {
+            //     TitleContains = "Nuevo Caso",
+            //     BodyContains = "Se desgina al medico a un nuevo caso"
+            // };
             
-            legalCaseAction.NotificationCondition = notificationConditionForNewCase;
+            // legalCaseAction.NotificationCondition = notificationConditionForNewCase;
             
-            // create LegalCaseAttribute
-            var legalCaseAttribute = new LegalCaseAttribute
-            {
-                Name = "New Case",
-                Description = "Attribute for New Case",
-                CreatedAt = DateTime.UtcNow // Example value for CreatedAt
-            };
+            // // create LegalCaseAttribute
+            // var legalCaseAttribute = new LegalCaseAttribute
+            // {
+            //     Name = "New Case",
+            //     Description = "Attribute for New Case",
+            //     CreatedAt = DateTime.UtcNow // Example value for CreatedAt
+            // };
 
-            legalCaseAction.LegalCaseAttributesToAdd.Add(legalCaseAttribute);
+            // legalCaseAction.LegalCaseAttributesToAdd.Add(legalCaseAttribute);
 
-            _context.LegalCaseActions.Add(legalCaseAction);
+            // _context.LegalCaseActions.Add(legalCaseAction);
             _context.SaveChanges();
 
         }

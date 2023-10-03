@@ -64,13 +64,59 @@ namespace AutoLegalTracker_API.DataAccess
                 .ToListAsync();
         }
 
+        public async Task<LegalCase?> GetLastScrappedLegalCase(int userId)
+        {
+            return await _context.LegalCases.Where(legalCase => legalCase.UserId == userId).OrderByDescending(legalCase => legalCase.CreatedAt).FirstOrDefaultAsync();
+        }
+
+        public async Task AddRangeAsync(IEnumerable<LegalCase> legalCasesToAdd)
+        {
+            await _context.LegalCases.AddRangeAsync(legalCasesToAdd);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<LegalCase>> GetCasesToScrap(int userId)
+        {
+            var dateToFilter = DateTime.Now.AddDays(-1);
+            return await _context.LegalCases.Where(
+                legalCase => legalCase.UserId == userId && 
+                legalCase.ClosedAt == null && 
+                (!legalCase.LastScrappedAt.HasValue || legalCase.LastScrappedAt.Value < dateToFilter) &&
+                !_context.LegalNotifications.Select(ln => ln.LegalCaseId).Contains(legalCase.Id))
+                .ToListAsync();
+        }
+
+        internal async Task<bool> hasMoreLegalNotificationsToFill(int userId)
+        {
+            return await _context.LegalNotifications.AnyAsync(ln => ln.Body == null && ln.LegalCase.User.Id == userId);
+        }
+
+        internal async Task<IEnumerable<LegalCase>> GetCasesWithEmptyNotifications()
+        {
+            return await _context.LegalCases
+            .Where(
+                lc => lc.LegalNotifications
+                    .Any(
+                        ln => ln.ScrapUrl != null 
+                        && ln.Body == null
+                        )
+                )
+            .ToListAsync();
+        }
+
+        internal Task UpdateLastScrappedAt(LegalCase legalCase)
+        {
+            legalCase.LastScrappedAt = DateTime.Now;
+            return _context.SaveChangesAsync();
+        }
+
         //public async Task<List<LegalCase>> getAllNotificationsUnseen(User user)
         //{
         //    //Disabling Eager Loading with AsNoTracking
         //    return await _context.LegalCases
         //        .Where(legalCase => legalCase.UserId == user.Id && legalCase.ClosedAt == null)
         //        .Include(legalCase => legalCase.)
-                
+
         //        .ToListAsync();
         //}
 

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLegalTracker_API._3_DataAccess.Migrations
 {
     [DbContext(typeof(ALTContext))]
-    [Migration("20230919012153_12_Database_models")]
+    [Migration("20231003110652_12_Database_models")]
     partial class _12_Database_models
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,6 +163,7 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CaseNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ClosedAt")
@@ -172,7 +173,6 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ExpenseAdvances")
@@ -185,11 +185,18 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("LastScrappedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("LegalCaseHonorarium")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("PossibleCourtDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ScrapUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -356,14 +363,13 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                     b.Property<bool>("ActionHasBeenTaken")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Body")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("From")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LegalAutomationId")
@@ -375,7 +381,23 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                     b.Property<int?>("MedicalAppointmentId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("NotificationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NotificationType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("Read")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ScrapUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Signed")
                         .HasColumnType("bit");
 
                     b.Property<string>("Title")
@@ -383,7 +405,6 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("To")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -501,6 +522,31 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                     b.ToTable("NotificationConditions");
                 });
 
+            modelBuilder.Entity("AutoLegalTracker_API.Models.NotificationReference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LegalNotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LegalNotificationId");
+
+                    b.ToTable("NotificationReferences");
+                });
+
             modelBuilder.Entity("AutoLegalTracker_API.Models.RequestedAnalysis", b =>
                 {
                     b.Property<int>("Id")
@@ -596,6 +642,12 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("LastScrappedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LastScrappedPage")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -649,28 +701,6 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                     b.HasIndex("LegalCaseActionId");
 
                     b.ToTable("UserTypes");
-                });
-
-            modelBuilder.Entity("AutoLegalTracker_API.Models.WeatherForecast", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TemperatureC")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WeatherForecasts");
                 });
 
             modelBuilder.Entity("LegalCaseAttributesToAdd", b =>
@@ -820,6 +850,15 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
                     b.Navigation("MedicalAppointment");
                 });
 
+            modelBuilder.Entity("AutoLegalTracker_API.Models.NotificationReference", b =>
+                {
+                    b.HasOne("AutoLegalTracker_API.Models.LegalNotification", null)
+                        .WithMany("NotificationReferences")
+                        .HasForeignKey("LegalNotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AutoLegalTracker_API.Models.RequestedAnalysis", b =>
                 {
                     b.HasOne("AutoLegalTracker_API.Models.LegalCase", "LegalCase")
@@ -932,6 +971,11 @@ namespace AutoLegalTracker_API._3_DataAccess.Migrations
             modelBuilder.Entity("AutoLegalTracker_API.Models.LegalCaseCondition", b =>
                 {
                     b.Navigation("LegalCaseAttributes");
+                });
+
+            modelBuilder.Entity("AutoLegalTracker_API.Models.LegalNotification", b =>
+                {
+                    b.Navigation("NotificationReferences");
                 });
 
             modelBuilder.Entity("AutoLegalTracker_API.Models.MedicalAppointment", b =>

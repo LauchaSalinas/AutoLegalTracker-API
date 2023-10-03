@@ -23,7 +23,7 @@ namespace AutoLegalTracker_API.Business
 
             if (condition.BodyContains != null)
             {
-                if (!legalNotification.Description.Contains(condition.BodyContains))
+                if (!legalNotification.Body.Contains(condition.BodyContains))
                 {
                     return false;
                 }
@@ -39,7 +39,7 @@ namespace AutoLegalTracker_API.Business
 
             if (condition.BodyDoesNotContain != null)
             {
-                if (legalNotification.Description.Contains(condition.BodyDoesNotContain))
+                if (legalNotification.Body.Contains(condition.BodyDoesNotContain))
                 {
                     return false;
                 }

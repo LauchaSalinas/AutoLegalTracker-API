@@ -23,11 +23,12 @@ namespace AutoLegalTracker_API.Models
         /// Caratula de casusa
         /// </summary>
         public string Caption { get; set; } 
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public string Jurisdiction { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? ClosedAt { get; set; }
+        public DateTime? LastScrappedAt { get; set; }
         /// <summary>
         /// Fecha de posible de sentencia o resolución judicial para cobro
         /// </summary>
@@ -36,7 +37,7 @@ namespace AutoLegalTracker_API.Models
         /// Peritajes
         /// </summary>
         public virtual ICollection<RequestedAnalysis> RequestedAnalyses { get; set; }  // Navigation property
-        public string? CaseNumber { get; set; }
+        public string CaseNumber { get; set; }
         [Column(TypeName = "decimal(18, 2)")]
         public decimal ExpenseAdvances { get; set; } = 0;
         /// <summary>
@@ -55,6 +56,8 @@ namespace AutoLegalTracker_API.Models
         public virtual ICollection<LegalCaseAttribute> LegalCaseAttributes { get; set; } // Navigation property
         
         public virtual ICollection<LegalNotification> LegalNotifications { get; set; } // Navigation property
+
+        public string ScrapUrl { get; set; }
     } 
     
 

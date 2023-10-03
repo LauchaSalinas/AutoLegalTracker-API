@@ -50,4 +50,7 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="0_Common/Configurations/" />
+  </ItemGroup>
 </Project>

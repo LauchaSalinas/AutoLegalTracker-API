@@ -1,7 +1,6 @@
 ﻿using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoLegalTracker_API.Controllers
@@ -32,11 +31,7 @@ namespace AutoLegalTracker_API.Controllers
 
             try
             {
-                // QUE HACE EL BUSINESS?
-                // 1. TIENE NOMBRE DE PROCESO DE NEGOCIO
-                // 2. CONTACTA SERVICIOS Y DATA ACCESS PARA DEVOLVER UN RESULTADO
                 var actions = await _actionBusiness.GetActions(user);
-
                 return new OkObjectResult(new { actions });
             }
             catch (ApplicationException appex)
