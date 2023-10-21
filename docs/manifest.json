@@ -1,0 +1,760 @@
+{
+  "source_base_path": "/Users/laaaucha/Projects/AutoLegalTracker/AutoLegalTracker-API/docfx_project",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ALTDeployTest.Controllers.LoginRequestModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ALTDeployTest.Controllers.LoginRequestModel.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ALTDeployTest.Controllers.ScrappingCredentialsModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ALTDeployTest.Controllers.ScrappingCredentialsModel.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ALTDeployTest.Controllers.UserController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ALTDeployTest.Controllers.UserController.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ALTDeployTest.Controllers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ALTDeployTest.Controllers.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.ActionBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.ActionBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.CalendarBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.CalendarBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.CaseBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.CaseBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.ConditionBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.ConditionBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.EmailBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.EmailBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.JwtBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.JwtBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.LegalNotificationBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.LegalNotificationBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.MedicalAppointmentBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.MedicalAppointmentBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.ScrapBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.ScrapBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.UserBusiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.UserBusiness.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Business.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Business.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Common.DatabaseStartup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Common.DatabaseStartup.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Common.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Common.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Controllers.ActionController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Controllers.ActionController.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Controllers.CalendarController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Controllers.CalendarController.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Controllers.CaseController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Controllers.CaseController.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Controllers.MedicalAppointmentController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Controllers.MedicalAppointmentController.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Controllers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Controllers.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.ALTContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.ALTContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.ActionDataAccess.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.ActionDataAccess.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.DataAccessAsync-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.DataAccessAsync-1.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.IDataAccesssAsync-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.IDataAccesssAsync-1.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.LegalCaseDataAccessAsync.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.LegalCaseDataAccessAsync.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.LegalNotificationDataAccess.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.LegalNotificationDataAccess.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.UserDataAccess.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.UserDataAccess.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.DataAccess.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.DataAccess.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.Calendar.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.Calendar.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.EmailLog.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.EmailLog.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.EmailTemplate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.EmailTemplate.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.EmailTemplateEnum.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.EmailTemplateEnum.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.Jwt.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.Jwt.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.JwtConstants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.JwtConstants.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalAutomation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalAutomation.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalCase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalCase.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalCaseAction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalCaseAction.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalCaseAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalCaseAttribute.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalCaseCondition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalCaseCondition.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalNotification.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalNotification.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.LegalResponseTemplate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.LegalResponseTemplate.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.MedicalAppointment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.MedicalAppointment.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.NotificationCondition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.NotificationCondition.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.NotificationReference.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.NotificationReference.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.RequestedAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.RequestedAnalysis.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.RequestedCourtOrder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.RequestedCourtOrder.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.ScrapJob.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.ScrapJob.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.User.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.User.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.UserType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.UserType.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Program.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Program.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.ScrapController.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.ScrapController.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Services.CronService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Services.CronService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Services.EmailService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Services.EmailService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Services.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Services.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Tests.UnitTest1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Tests.UnitTest1.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.Tests.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.Tests.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.WebServices.GoogleCalendarService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.WebServices.GoogleCalendarService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.WebServices.GoogleDriveService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.WebServices.GoogleDriveService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.WebServices.GoogleOAuth2Service.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.WebServices.GoogleOAuth2Service.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.WebServices.PuppeteerService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.WebServices.PuppeteerService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.WebServices.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.WebServices.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API._3_DataAccess.Migrations._12_Database_models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API._3_DataAccess.Migrations._12_Database_models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API._3_DataAccess.Migrations.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API._3_DataAccess.Migrations.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/AutoLegalTracker_API.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/AutoLegalTracker_API.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/knownerrors.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/knownerrors.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html"
+        },
+        ".json": {
+          "relative_path": "articles/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
