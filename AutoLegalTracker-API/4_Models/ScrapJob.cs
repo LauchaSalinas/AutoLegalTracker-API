@@ -1,6 +1,7 @@
 ﻿using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.DataAccess;
 using Quartz;
+using System.Linq;
 
 namespace AutoLegalTracker_API.Models
 {
@@ -41,65 +42,104 @@ namespace AutoLegalTracker_API.Models
                         throw;
                     }
 
-                    // try
-                    // {
-                    //     var lastScrappedLegalCase = await _legalCaseDataAccess.GetLastScrappedLegalCase(user.Id);
-                    //     var lastScrappedPage = user.LastScrappedPage;
-                    //     lastScrappedLegalCase = lastScrappedLegalCase ?? new LegalCase { CaseNumber = "0" };
-                    //     (IEnumerable<LegalCase> legalCasesToAdd, var newLastScrappedPage) = await _scrapBusiness.ScrapUserGetNewCases(user, lastScrappedLegalCase.CaseNumber, lastScrappedPage);
-                    //     await _legalCaseDataAccess.AddRangeAsync(legalCasesToAdd);
-                    //     await _userDataAccess.UpdateLastScrappedPage(user, newLastScrappedPage);
-                    // }
-                    // catch(Exception ex)
-                    // {
-                    //     Console.WriteLine(ex.ToString());
-                    //     throw;
-                    //     // TODO handle TargetClosedException and other exceptions
-                    // }
-                    
-                    try
-                    {
-                        IEnumerable<LegalCase> legalCasesToUpdate = await _legalCaseDataAccess.GetCasesToScrap(user.Id);
-                        foreach (var legalCase in legalCasesToUpdate)
-                        {
-                            var lastNotification = await _legalNotificationDataAccess.GetLastNotification(legalCase.Id);
-                            try{
-                                var legalNotificationsToAdd = await _scrapBusiness.ScrapCaseGetNewNotifications(legalCase, lastNotification);
-                                await _legalNotificationDataAccess.AddRangeAsync(legalNotificationsToAdd);
-                                // update last scrapped at
-                                legalCase.LastScrappedAt = DateTime.Now;
-                                await _legalCaseDataAccess.UpdateLastScrappedAt(legalCase);
-                                Console.WriteLine($"Caso cargado {legalCase.Id} ");
+                    //try
+                    //{
+                    //    var lastScrappedLegalCase = await _legalCaseDataAccess.GetLastScrappedLegalCase(user.Id);
+                    //    var lastScrappedPage = user.LastScrappedPage;
+                    //    lastScrappedLegalCase = lastScrappedLegalCase ?? new LegalCase { CaseNumber = "0" };
+                    //    (IEnumerable<LegalCase> legalCasesToAdd, var newLastScrappedPage) = await _scrapBusiness.ScrapUserGetNewCases(user, lastScrappedLegalCase.CaseNumber, lastScrappedPage);
+                    //    await _legalCaseDataAccess.AddRangeAsync(legalCasesToAdd);
+                    //    await _userDataAccess.UpdateLastScrappedPage(user, newLastScrappedPage);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine(ex.ToString());
+                    //    throw;
+                    //    // TODO handle TargetClosedException and other exceptions
+                    //}
 
-                            }
-                            catch(Exception ex)
-                            {
-                                Console.WriteLine($"Error de carga caso {legalCase.Id} " + ex.ToString());
-                            }
+                    //try
+                    //{
+                    //    IEnumerable<LegalCase> legalCasesToUpdate = await _legalCaseDataAccess.GetCasesToScrap(user.Id);
+                    //    foreach (var legalCase in legalCasesToUpdate)
+                    //    {
+                    //        var lastNotification = await _legalNotificationDataAccess.GetLastNotification(legalCase.Id);
+                    //        try{
+                    //            var legalNotificationsToAdd = await _scrapBusiness.ScrapCaseGetNewNotifications(legalCase, lastNotification);
+                    //            await _legalNotificationDataAccess.AddRangeAsync(legalNotificationsToAdd);
+                    //            // update last scrapped at
+                    //            legalCase.LastScrappedAt = DateTime.Now;
+                    //            await _legalCaseDataAccess.UpdateLastScrappedAt(legalCase);
+                    //            Console.WriteLine($"Caso cargado {legalCase.Id} ");
+
+                    //        }
+                    //        catch(Exception ex)
+                    //        {
+                    //            Console.WriteLine($"Error de carga caso {legalCase.Id} " + ex.ToString());
+                    //        }
                             
-                        }
-                    }
-                    catch(Exception ex)
+                    //    }
+                    //}
+                    //catch(Exception ex)
+                    //{
+                    //    Console.WriteLine(ex.ToString());
+                    //    throw;
+                    //}
+
+                    //try
+                    //{
+                    //    IEnumerable<LegalCase> legalCasesWithEmptyNotifications = await _legalCaseDataAccess.GetCasesWithEmptyNotifications(user.Id);
+                    //    foreach (var legalCase in legalCasesWithEmptyNotifications)
+                    //    {
+                    //        var legalNotificationsToFill = await _legalNotificationDataAccess.GetEmptyNotifications(legalCase.Id);
+                    //        var legalNotificationsToUpdate = await _scrapBusiness.ScrapNotificationsUpdateContent(legalNotificationsToFill);
+                    //        await _legalNotificationDataAccess.UpdateRangeAsync(legalNotificationsToUpdate);
+                    //    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine(ex.ToString());
+                    //    throw;
+                    //}
+
+
+
+                    // TODO add user to the function
+                    // TODO pass date to the function, recursively last 5 days.
+                    for (int pastDaysToScrap = 1 ; pastDaysToScrap <= 5; pastDaysToScrap++) 
                     {
-                        Console.WriteLine(ex.ToString());
-                        throw;
+                        try
+                        {
+                            var legalCasesFromNotificationPage = await _scrapBusiness.SaveCasesByNotificationsPage(user.Id, pastDaysToScrap);
+
+                            foreach (var legalCase in legalCasesFromNotificationPage)
+                            {
+                                var lastNotification = await _legalNotificationDataAccess.GetLastNotification(legalCase.Id);
+                                try
+                                {
+                                    var legalNotificationsToAdd = await _scrapBusiness.ScrapCaseGetNewNotifications(legalCase, lastNotification);
+                                    await _legalNotificationDataAccess.AddRangeAsync(legalNotificationsToAdd);
+                                    // update last scrapped at
+                                    legalCase.LastScrappedAt = DateTime.Now;
+                                    await _legalCaseDataAccess.UpdateLastScrappedAt(legalCase);
+                                    Console.WriteLine($"Caso cargado {legalCase.Id} ");
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Error de carga caso {legalCase.Id} " + ex.ToString());
+                                }
+
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            throw;
+                        }
                     }
 
-                    try
-                    {
-                        IEnumerable<LegalCase> legalCasesWithEmptyNotifications = await _legalCaseDataAccess.GetCasesWithEmptyNotifications();
-                        foreach (var legalCase in legalCasesWithEmptyNotifications)
-                        {
-                            var legalNotificationsToFill = await _legalNotificationDataAccess.GetEmptyNotifications(legalCase.Id);
-                            var legalNotificationsToUpdate = await _scrapBusiness.ScrapNotificationsUpdateContent(legalNotificationsToFill);
-                            await _legalNotificationDataAccess.UpdateRangeAsync(legalNotificationsToUpdate);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                        throw;
-                    }
                     await _scrapBusiness.LogOut();
                 }
                 
@@ -111,21 +151,17 @@ namespace AutoLegalTracker_API.Models
                 Console.WriteLine(ex.ToString());
             }
 
-            // // CheckForActionsForNewNotificationsJob
-            // try
-            // {
-            //     await _actionBusiness.RunActionsToNewNotifications();
-            //     Console.WriteLine("CheckForActionsForNewNotifications finished at: " + DateTime.Now);
-            // }
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine(ex.ToString());
-            // }
+            // CheckForActionsForNewNotificationsJob
+            try
+            {
+                await _actionBusiness.RunActionsToNewNotifications();
+                Console.WriteLine("CheckForActionsForNewNotifications finished at: " + DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
-        }
-        static async Task EmulateAsyncMethod(int secondsDelay)
-        {
-            await Task.Delay(secondsDelay*1000);
         }
     }
 }

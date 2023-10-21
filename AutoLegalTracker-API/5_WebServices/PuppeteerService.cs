@@ -15,7 +15,7 @@ namespace AutoLegalTracker_API.WebServices
         {
             var options = new LaunchOptions
             {
-                Headless = true,
+                Headless = false,
                 EnqueueAsyncMessages = true,
                 IgnoreHTTPSErrors = true,
                 // Args = new string[] { "--disable-web-security", "--disable-features=IsolateOrigins,site-per-process", "--disable-extensions", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox", "--no-zygote" },
@@ -103,6 +103,27 @@ namespace AutoLegalTracker_API.WebServices
             return result.ToString();
         }
 
+        public async Task TypeAsync(string selector, string text)
+        {
+            await _page.TypeAsync(selector, text);
+        }
+
+        public async Task ClearInputAsync(string selector)
+        {
+            await _page.ClickAsync(selector);
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+            await _page.Keyboard.PressAsync("Backspace");
+        }
         public async Task ExecuteJs(string functionJS)
         {
             await _page.ExposeFunctionAsync(functionJS, () => { });
@@ -119,7 +140,28 @@ namespace AutoLegalTracker_API.WebServices
             // {
                 await _page.DisposeAsync();
                 _page = await _browser.NewPageAsync();
-                await _page.GoToAsync(url, timeout: 4000);
+                await _page.GoToAsync(url, timeout: 5000);
+            // }
+            // catch
+            // {
+            //     await _page.WaitForTimeoutAsync(30000);
+            //     await _page.ReloadAsync();
+            //     await _page.WaitForTimeoutAsync(1000);
+            // }
+            if (_page != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> GoToUrl(string url, int timeout)
+        {
+            // try
+            // {
+            await _page.DisposeAsync();
+            _page = await _browser.NewPageAsync();
+            await _page.GoToAsync(url, timeout: timeout);
             // }
             // catch
             // {

@@ -60,7 +60,8 @@ namespace AutoLegalTracker_API.DataAccess
                     .Where(
                         ln => ln.LegalCaseId == legalCaseId 
                         && ln.Body == null
-                        // && ln.NotificationDate > DateTime.Now.AddDays(-1)
+                        && ln.NotificationDate > DateTime.Now.AddDays(-5)
+                        && ln.ScrapUrl != null
                     )
                     .ToListAsync();
         }

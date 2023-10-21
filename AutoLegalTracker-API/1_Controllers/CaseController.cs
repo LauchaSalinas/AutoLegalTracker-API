@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 using AutoLegalTracker_API.Business;
 using AutoLegalTracker_API.Models;
+using System.Text.Json.Nodes;
+using Microsoft.EntityFrameworkCore;
+using AutoLegalTracker_API.DataAccess;
 
 namespace AutoLegalTracker_API.Controllers
 {
@@ -15,14 +19,20 @@ namespace AutoLegalTracker_API.Controllers
         private IConfiguration _configuration;
         private UserBusiness _userBusiness;
         private CaseBusiness _caseBusiness;
-        private LegalNotificationBusiness _notificationBusiness; 
+        private LegalNotificationBusiness _notificationBusiness;
+        private readonly ALTContext _altContext;
 
-        public CaseController(IConfiguration configuration, UserBusiness userBusiness, CaseBusiness caseBusiness, LegalNotificationBusiness notificationBusiness)
+        public CaseController(IConfiguration configuration, 
+            UserBusiness userBusiness, 
+            CaseBusiness caseBusiness, 
+            LegalNotificationBusiness notificationBusiness,
+            ALTContext aLTContext)
         {
             _configuration = configuration;
             _userBusiness = userBusiness;
             _caseBusiness = caseBusiness;
             _notificationBusiness = notificationBusiness;
+            _altContext = aLTContext;
         }
 
         #endregion Constructor
@@ -67,6 +77,88 @@ namespace AutoLegalTracker_API.Controllers
 
             
         }
+
+
+        [HttpGet("getCasesFilteredAndPaged")]
+        public async Task<IActionResult> GetCasesFilteredAndPaged(
+            string? title = null, 
+            string? notificationDateFrom = null,
+            string? notificationDateTo = null,
+            int page = 1)
+        {
+            int pageSize = 50;
+
+            page = Math.Max(1, page);
+            pageSize = Math.Max(1, pageSize);
+
+            // Calculate the number of records to skip
+            int skipCount = (page - 1) * pageSize;
+
+            if(notificationDateFrom == null)
+                notificationDateFrom = DateTime.Now.AddMonths(-1).ToString("dd/MM/yyyy");
+            if(notificationDateTo == null)
+                notificationDateTo = DateTime.Now.ToString("dd/MM/yyyy");
+
+            var notificationDateFromParsed = DateTime.Parse(notificationDateFrom);
+            var notificationDateToParsed = DateTime.Parse(notificationDateTo);
+
+            if(title == null)
+                title = string.Empty;
+
+            // TODO add user
+            // Query the database, applying pagination
+            var pagedData = await _altContext.LegalNotifications
+                .Where( ln => ln.Title.Contains(title) && 
+                        ln.NotificationDate >= notificationDateFromParsed && 
+                        ln.NotificationDate <= notificationDateToParsed)
+                .OrderBy(e => e.NotificationDate) // Replace with your sorting criteria
+                .Skip(skipCount)
+                .Take(pageSize)
+                .Select(ln => new { ln.Title, ln.Body, ln.NotificationDate, ln.LegalCaseId })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new OkObjectResult(pagedData);
+        }
+
+        [HttpGet("getCasesFilteredAndPagedPageCount")]
+        public async Task<IActionResult> GetCasesFilteredAndPagedPageCount(
+            string? title = null,
+            string? notificationDateFrom = null,
+            string? notificationDateTo = null,
+            int page = 1)
+        {
+            int pageSize = 50;
+
+            page = Math.Max(1, page);
+            pageSize = Math.Max(1, pageSize);
+
+            // Calculate the number of records to skip
+            int skipCount = (page - 1) * pageSize;
+
+            if (notificationDateFrom == null)
+                notificationDateFrom = DateTime.Now.AddMonths(-1).ToString("dd/MM/yyyy");
+            if (notificationDateTo == null)
+                notificationDateTo = DateTime.Now.ToString("dd/MM/yyyy");
+
+            var notificationDateFromParsed = DateTime.Parse(notificationDateFrom);
+            var notificationDateToParsed = DateTime.Parse(notificationDateTo);
+
+            if (title == null)
+                title = string.Empty;
+
+            // TODO add user
+            // Query the database, applying pagination
+            var pagedData = await _altContext.LegalNotifications
+                .CountAsync(ln => ln.Title.Contains(title) &&
+                            ln.NotificationDate >= notificationDateFromParsed &&
+                            ln.NotificationDate <= notificationDateToParsed);
+
+            var totalPages = Math.Ceiling((decimal)pagedData / pageSize);
+
+            return new OkObjectResult(totalPages);
+        }
+
 
         [Authorize]
         [HttpGet("GetDashboardStatistics")]

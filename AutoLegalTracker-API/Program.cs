@@ -94,7 +94,7 @@ namespace AutoLegalTracker_API
                 q.ScheduleJob<ScrapJob>(trigger => trigger
                     .WithIdentity("Combined Configuration Trigger")
                     .StartNow()
-                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(5, IntervalUnit.Minute))
+                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
                     .WithDescription("my awesome trigger configured for a job with single call")
                 );
             });
@@ -121,30 +121,30 @@ namespace AutoLegalTracker_API
                 });
             });
 
-            builder.Services.AddQuartz(q =>
-            {
-                q.SchedulerId = "Scheduler-Core";
-                q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
-                q.AddJob<ScrapJob>(j => j
-                    .WithIdentity("Combined Configuration Job")
-                    .StoreDurably()
-                    .WithDescription("my awesome job configured for a single call")
-                );
-                q.AddTrigger(t => t
-                    .WithIdentity("Combined Configuration Trigger")
-                    .ForJob("Combined Configuration Job")
-                    .StartNow()
-                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
-                    .WithDescription("my awesome trigger configured for a job with single call")
-                );
-            });
+            //builder.Services.AddQuartz(q =>
+            //{
+            //    q.SchedulerId = "Scheduler-Core";
+            //    q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+            //    q.AddJob<ScrapJob>(j => j
+            //        .WithIdentity("Combined Configuration Job")
+            //        .StoreDurably()
+            //        .WithDescription("my awesome job configured for a single call")
+            //    );
+            //    q.AddTrigger(t => t
+            //        .WithIdentity("Combined Configuration Trigger")
+            //        .ForJob("Combined Configuration Job")
+            //        .StartNow()
+            //        .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
+            //        .WithDescription("my awesome trigger configured for a job with single call")
+            //    );
+            //});
 
             // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-            builder.Services.AddQuartzHostedService(options =>
-            {
-               // when shutting down we want jobs to complete gracefully
-               options.WaitForJobsToComplete = true;
-            });
+            //builder.Services.AddQuartzHostedService(options =>
+            //{
+            //   // when shutting down we want jobs to complete gracefully
+            //   options.WaitForJobsToComplete = true;
+            //});
 
             // configure logging to filter entity framework messages
             builder.Logging.AddFilter((provider, category, logLevel) =>

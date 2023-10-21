@@ -88,26 +88,62 @@ namespace AutoLegalTracker_API.DataAccess
 
         internal async Task<bool> hasMoreLegalNotificationsToFill(int userId)
         {
-            return await _context.LegalNotifications.AnyAsync(ln => ln.Body == null && ln.LegalCase.User.Id == userId);
+            
+            return await _context.LegalNotifications.AnyAsync(ln => 
+                                                                ln.Body == null 
+                                                                && ln.LegalCase.User.Id == userId
+                                                                );
         }
 
-        internal async Task<IEnumerable<LegalCase>> GetCasesWithEmptyNotifications()
+        internal async Task<IEnumerable<LegalCase>> GetCasesWithEmptyNotifications(int userId)
         {
-            return await _context.LegalCases
-            .Where(
-                lc => lc.LegalNotifications
-                    .Any(
-                        ln => ln.ScrapUrl != null 
-                        && ln.Body == null
-                        )
-                )
-            .ToListAsync();
+            var dateToFilter = DateTime.Now.AddDays(-5);
+
+            var result = from lc in _context.LegalCases
+                         join ln in _context.LegalNotifications on lc.Id equals ln.LegalCaseId
+                         where ln.ScrapUrl != null
+                            && ln.Body == null
+                            && lc.UserId == userId
+                            && lc.ClosedAt == null
+                            // && (ln.LegalCaseLastScrappedAt == null || ln.LegalCaseLastScrappedAt > dateToFilter)
+                            && ln.NotificationDate > dateToFilter
+                         select lc;
+
+            return await result.ToListAsync();
         }
 
         internal Task UpdateLastScrappedAt(LegalCase legalCase)
         {
             legalCase.LastScrappedAt = DateTime.Now;
             return _context.SaveChangesAsync();
+        }
+
+        //make function to find by list of cases
+        public async Task<List<LegalCase>> GetCasesByScrapUrl(List<string> caseScrapUrl)
+        {
+            return await _context.LegalCases.Where(legalCase => caseScrapUrl.Contains(legalCase.ScrapUrl)).ToListAsync();
+        }
+
+        internal LegalCase AddOrUpdate(LegalCase legalcaseToUpdate)
+        {
+            // check if the case exist to update or add it if doesnt exists
+            var legalCase = _context.LegalCases.Where(x => x.ScrapUrl == legalcaseToUpdate.ScrapUrl).FirstOrDefault();
+            if (legalCase != null)
+            {
+                legalCase.Caption = legalcaseToUpdate.Caption;
+                legalCase.Description = legalcaseToUpdate.Description;
+                legalCase.CaseNumber = legalcaseToUpdate.CaseNumber;
+                legalCase.Jurisdiction = legalcaseToUpdate.Jurisdiction;
+                legalCase.UpdatedAt = DateTime.Now;
+            }
+            else
+            {
+                _context.LegalCases.Add(legalcaseToUpdate);
+            }
+            _context.SaveChanges();
+            // get the id of the updated case or the new case
+            legalcaseToUpdate = _context.LegalCases.Where(x => x.ScrapUrl == legalcaseToUpdate.ScrapUrl).FirstOrDefault();
+            return legalcaseToUpdate;
         }
 
         //public async Task<List<LegalCase>> getAllNotificationsUnseen(User user)
