@@ -1,17 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+using LegalTracker.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Quartz.Impl;
-using Quartz;
 
-using AutoLegalTracker_API.Business;
-using AutoLegalTracker_API.Models;
-using AutoLegalTracker_API.Services;
-using AutoLegalTracker_API.WebServices;
-using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API.Common;
-
-
-namespace AutoLegalTracker_API
+namespace LegalTracker.API
 {
     public class Program
     {
@@ -25,88 +15,12 @@ namespace AutoLegalTracker_API
                 //.AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 
-            #region Dependency Injection
-
-            // Add dependency injection to the Business Logic Layer
-            builder.Services.AddTransient<JwtBusiness>();
-            builder.Services.AddTransient<UserBusiness>();
-            builder.Services.AddTransient<EmailBusiness>();
-            builder.Services.AddTransient<CalendarBusiness>();
-            builder.Services.AddTransient<MedicalAppointmentBusiness>();
-            builder.Services.AddTransient<ActionBusiness>();
-            builder.Services.AddTransient<ScrapBusiness>();
-            builder.Services.AddTransient<ConditionBusiness>();
-            builder.Services.AddTransient<CaseBusiness>();
-            builder.Services.AddTransient<LegalNotificationBusiness>();
-
-            builder.Services.AddTransient<ScrapJob>();
-
-            // Add dependency injection to the Services Layer
-            builder.Services.AddScoped<EmailService>();
-            builder.Services.AddScoped<GoogleOAuth2Service>();
-            builder.Services.AddScoped<GoogleCalendarService>();
-            builder.Services.AddScoped<GoogleDriveService>();
-            builder.Services.AddTransient<EmailService>();
-            builder.Services.AddTransient<PuppeteerService>();
-
-            // Add dependency injection to the Data Access Layer
-            builder.Services.AddScoped<IDataAccesssAsync<LegalCase>, DataAccessAsync<LegalCase>>();
-            builder.Services.AddScoped<IDataAccesssAsync<EmailTemplate>, DataAccessAsync<EmailTemplate>>();
-            builder.Services.AddScoped<IDataAccesssAsync<EmailLog>, DataAccessAsync<EmailLog>>();
-            builder.Services.AddScoped<IDataAccesssAsync<User>, DataAccessAsync<User>>();
-            builder.Services.AddScoped<IDataAccesssAsync<MedicalAppointment>, DataAccessAsync<MedicalAppointment>>();
-            builder.Services.AddScoped<IDataAccesssAsync<Models.Calendar>, DataAccessAsync<Models.Calendar>>();
-            builder.Services.AddScoped<ActionDataAccess>(); // check if this is neccesary
-            builder.Services.AddScoped<LegalCaseDataAccessAsync>(); // check if this is neccesary
-            builder.Services.AddScoped<LegalNotificationDataAccess>(); // check if this is neccesary
-            builder.Services.AddScoped<UserDataAccess>(); // check if this is neccesary
-
-            builder.Services.AddSingleton(provider =>
-            {
-                var schedulerFactory = new StdSchedulerFactory();
-                return schedulerFactory.GetScheduler().Result;
-            });
-
+           builder.Services.AddApplication(builder.Environment);
             
 
-            // Add Quartz scheduler service
-            builder.Configuration.AddJsonFile("./0_Common/Configurations/scrapSettings.json");
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
-            #endregion Dependency Injection
-
-            builder.Services.AddDbContext<ALTContext>(options =>
-            {
-                string connectionString = builder.Configuration["ASPNETCORE_DBCON"] ?? String.Empty;
-                options.UseSqlServer(connectionString);
-            });
-
-            #region Quartz
-
-            // make that waits for jobs to complete before running the job again
-
-            builder.Services.AddQuartz(q =>
-            {
-                q.SchedulerId = "Scheduler-Core";
-                q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
-                q.ScheduleJob<ScrapJob>(trigger => trigger
-                    .WithIdentity("Combined Configuration Trigger")
-                    .StartNow()
-                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(1, IntervalUnit.Minute))
-                    .WithDescription("my awesome trigger configured for a job with single call")
-                );
-            });
-
-            //Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-            builder.Services.AddQuartzHostedService(options =>
-            {
-                // when shutting down we want jobs to complete gracefully
-                options.WaitForJobsToComplete = true;
-            });
-
-            #endregion Quartz
 
             #region CORS and Security
 
@@ -193,12 +107,6 @@ namespace AutoLegalTracker_API
                 app.UseSwaggerUI();
             }
 
-            // Create scope for EntityFramework Database migration
-            using (var scope = app.Services.CreateScope())
-            {
-                var Context = scope.ServiceProvider.GetRequiredService<ALTContext>();
-                Context.Database.Migrate();
-            }
 
 
             // if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
