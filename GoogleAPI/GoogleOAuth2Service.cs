@@ -9,36 +9,31 @@ using Google.Apis.Util;
 using Google.Apis.Drive.v3;
 using Google.Apis.Calendar.v3;
 
-using LegalTracker.Domain.Entities;
-
 namespace GoogleAPI
 {
     public class GoogleOAuth2Service
     {
         #region Constructor
 
-        private readonly IConfiguration _configuration;
+        private readonly GoogleApiSettings _googleApiSettings;
         private readonly GoogleAuthorizationCodeFlow _flow; // Flow: https://frontegg.com/blog/oauth-flows
         private UserCredential? _credential;
 
-        public GoogleOAuth2Service(IConfiguration configuration)
+        public GoogleOAuth2Service(GoogleApiSettings googleApiSettings)
         {
-            _configuration = configuration;
+            _googleApiSettings = googleApiSettings;
             _flow = GetGoogleAuthorizationCodeFlow();
         }
 
-        public GoogleOAuth2Service Set(User user)
+        public GoogleOAuth2Service Set(GoogleAPIUserDTO user)
         {
-            var tokenResponse = GetTokenResponse(user.GoogleOAuth2AccessToken, user.GoogleOAuth2RefreshToken, user.GoogleOAuth2IdToken, user.GoogleOAuth2TokenCreatedAt, user.GoogleOAuth2TokenExpiration);
+            var tokenResponse = GetTokenResponse(user.AccessToken, user.RefreshToken, user.IdToken, user.TokenCreatedAt, user.TokenExpiration);
             _credential = GetUserCredential(_flow, tokenResponse);
             return this;
         }
 
         private GoogleAuthorizationCodeFlow GetGoogleAuthorizationCodeFlow()
         {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            string clientSecret = _configuration["OAUTH2_CLIENT_SECRET"] ?? string.Empty;
-
             // Define the scopes for the google api
             string[] scopes = new string[]
             {
@@ -51,7 +46,7 @@ namespace GoogleAPI
             // Define the google authentification flow and initialize it with the clientID and clientSecret
             GoogleAuthorizationCodeFlow.Initializer initializer = new GoogleAuthorizationCodeFlow.Initializer
             {
-                ClientSecrets = new ClientSecrets() { ClientId = clientID, ClientSecret = clientSecret },
+                ClientSecrets = new ClientSecrets() { ClientId = _googleApiSettings.ClientID, ClientSecret = _googleApiSettings.ClientSecret },
                 Scopes = scopes
             };
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(initializer);
@@ -64,7 +59,7 @@ namespace GoogleAPI
 
         public CalendarService GetCalendarService()
         {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
+            string clientID = _googleApiSettings.ClientID ?? string.Empty;
             var calendarService = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = _credential,
@@ -75,7 +70,7 @@ namespace GoogleAPI
 
         public DriveService GetDriveService()
         {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
+            string clientID = _googleApiSettings.ClientID ?? string.Empty;
             var driveService = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = _credential,
@@ -97,16 +92,12 @@ namespace GoogleAPI
         }
         private async Task<TokenResponse> GetTokenResponseAsync(string oneTimeTokenString)
         {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            string clientSecret = _configuration["OAUTH2_CLIENT_SECRET"] ?? string.Empty;
-            string redirectUri = _configuration["OAUTH2_REDIRECT_URI"] ?? string.Empty;
-
             TokenResponse tokenResponse = await new AuthorizationCodeTokenRequest
             {
                 Code = oneTimeTokenString,
-                ClientId = clientID,
-                ClientSecret = clientSecret,
-                RedirectUri = redirectUri
+                ClientId = _googleApiSettings.ClientID,
+                ClientSecret = _googleApiSettings.ClientSecret,
+                RedirectUri = _googleApiSettings.RedirectURI
             }.ExecuteAsync(new HttpClient(), GoogleAuthConsts.OidcTokenUrl, CancellationToken.None, SystemClock.Default);
             return tokenResponse;
         }
@@ -133,12 +124,9 @@ namespace GoogleAPI
         // create refresh token from access token
         private TokenResponse RefreshToken(TokenResponse token)
         {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
-            string clientSecret = _configuration["OAUTH2_CLIENT_SECRET"] ?? string.Empty;
-
             var initializer = new GoogleAuthorizationCodeFlow.Initializer
             {
-                ClientSecrets = new ClientSecrets() { ClientId = clientID, ClientSecret = clientSecret },
+                ClientSecrets = new ClientSecrets() { ClientId = _googleApiSettings.ClientID, ClientSecret = _googleApiSettings.ClientSecret },
             };
             var flow = new GoogleAuthorizationCodeFlow(initializer);
             var credential = new UserCredential(flow, "user", token);
@@ -161,12 +149,11 @@ namespace GoogleAPI
         #region User API
         public Userinfo GetMeObject(UserCredential credential)
         {
-            string clientID = _configuration["OAUTH2_CLIENT_ID"] ?? string.Empty;
             // Define a service to make requests to the google api
             var meService = new Oauth2Service(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = clientID
+                ApplicationName = _googleApiSettings.ClientID
             });
 
             // Make a request to the google api to get the user info

@@ -1,8 +1,8 @@
-﻿using AutoLegalTracker_API.Models;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using LegalTracker.DataAccess.Persistence;
+using LegalTracker.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoLegalTracker_API.DataAccess
+namespace LegalTracker.DataAccess.Repositories.Impl
 {
     public class LegalNotificationDataAccess
     {

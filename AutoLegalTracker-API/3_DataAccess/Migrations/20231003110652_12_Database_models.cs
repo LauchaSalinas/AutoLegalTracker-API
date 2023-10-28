@@ -3,7 +3,7 @@
 
 //#nullable disable
 
-//namespace AutoLegalTracker_API._3_DataAccess.Migrations
+//namespace LegalTracker._3_DataAccess.Migrations
 //{
 //    public partial class _12_Database_models : Migration
 //    {

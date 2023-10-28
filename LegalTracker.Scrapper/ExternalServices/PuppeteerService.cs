@@ -26,7 +26,7 @@ namespace LegalTracker.Scrapper.ExternalServices
             Console.WriteLine("Downloading chromium");
 
             using var browserFetcher = new BrowserFetcher();
-            // await browserFetcher.DownloadAsync();
+            await browserFetcher.DownloadAsync();
 
             _browser = await Puppeteer.LaunchAsync(options);
             

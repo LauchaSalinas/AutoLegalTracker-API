@@ -1,4 +1,4 @@
-namespace AutoLegalTracker_API.Tests
+namespace LegalTracker.Tests
 {
     [TestClass]
     public class UnitTest1

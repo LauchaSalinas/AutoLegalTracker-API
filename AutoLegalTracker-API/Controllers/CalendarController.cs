@@ -13,14 +13,14 @@ namespace LegalTracker.API.Controllers
         #region Constructor
 
         private IConfiguration _configuration;
-        private UserBusiness _userBusiness;
-        private CalendarBusiness _calendarBusiness;
+        private UserService _userBusiness;
+        private CalendarService _calendarService;
 
-        public CalendarController(IConfiguration configuration, UserBusiness userBusiness, CalendarBusiness calendarBusiness)
+        public CalendarController(IConfiguration configuration, UserService userBusiness, CalendarService calendarBusiness)
         {
             _configuration = configuration;
             _userBusiness = userBusiness;
-            _calendarBusiness = calendarBusiness;
+            _calendarService = calendarBusiness;
         }
 
         #endregion Constructor
@@ -36,7 +36,7 @@ namespace LegalTracker.API.Controllers
 
             try
             {
-                var result = await _calendarBusiness.GetCalendars(user);
+                var result = await _calendarService.GetCalendars(user);
 
                 return new OkObjectResult(result);
             }

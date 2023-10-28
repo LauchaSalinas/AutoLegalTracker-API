@@ -8,7 +8,7 @@
 
 //#nullable disable
 
-//namespace AutoLegalTracker_API._3_DataAccess.Migrations
+//namespace LegalTracker._3_DataAccess.Migrations
 //{
 //    [DbContext(typeof(ALTContext))]
 //    partial class ALTContextModelSnapshot : ModelSnapshot

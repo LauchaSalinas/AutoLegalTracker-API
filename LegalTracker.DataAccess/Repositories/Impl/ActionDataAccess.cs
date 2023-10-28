@@ -1,17 +1,16 @@
-﻿using AutoLegalTracker_API.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using LegalTracker.DataAccess.Persistence;
+using LegalTracker.Domain.Entities;
 
-namespace AutoLegalTracker_API.DataAccess
+namespace LegalTracker.DataAccess.Repositories.Impl
 {
     public class ActionDataAccess
     {
         #region Constructor
-        private readonly IConfiguration _configuration;
         private readonly ALTContext _context;
 
-        public ActionDataAccess(IConfiguration configuration, ALTContext context)
+        public ActionDataAccess(ALTContext context)
         {
-            _configuration = configuration;
             _context = context;
         }
         #endregion Constructor

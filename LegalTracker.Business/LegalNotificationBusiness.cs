@@ -1,7 +1,7 @@
-﻿using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API.Models;
+﻿using LegalTracker.DataAccess.Repositories.Impl;
+using LegalTracker.Domain.Entities;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class LegalNotificationBusiness
     {

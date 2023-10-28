@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LegalTracker.Domain.Entities;
 
-namespace LegalTracker.Domain.Entities
+namespace LegalTracker.Domain.DTOs
 {
-    public class UserToScrapDTO
+    public class UserToScrapNewLegalCasesDTO
     {
-        public UserToScrapDTO()
+        public UserToScrapNewLegalCasesDTO()
         {
             LastScrappedLegalCase = new LegalCase();
+            ScrappedLegalCases = new List<LegalCase>();
             WebCredentialUser = string.Empty;
             WebCredentialPassword = string.Empty;
         }
@@ -23,6 +20,8 @@ namespace LegalTracker.Domain.Entities
         public int LastScrappedPage { get; set; } = 1;
 
         public DateTime? LastScrappedAt { get; set; }
+
+        public List<LegalCase> ScrappedLegalCases { get; set; }
 
     }
 }

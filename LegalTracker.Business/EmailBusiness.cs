@@ -1,9 +1,10 @@
-﻿using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API.Models;
-using AutoLegalTracker_API.Services;
+﻿using LegalTracker.DataAccess.Repositories;
+using LegalTracker.Domain.Entities;
+using LegalTracker.DataAccess.Repositories.Impl;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using EmailSender;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class EmailBusiness
     {
@@ -96,8 +97,9 @@ namespace AutoLegalTracker_API.Business
             if (emailTemplate == null){
                 throw new ApplicationException("Email template not found");
             }
-                
-            _emailService.sendEmail(emailTemplate, userTo);
+
+            // TODO fix templates  
+            //_emailService.sendEmail(emailTemplate, userTo);
 
             var emailLog = new EmailLog {
                 UserTo = userTo,

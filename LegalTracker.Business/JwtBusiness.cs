@@ -1,11 +1,11 @@
-﻿using AutoLegalTracker_API.Models;
+﻿using LegalTracker.Domain.Entities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Google.Apis.Oauth2.v2.Data;
+using Microsoft.Extensions.Configuration;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class JwtBusiness
     {

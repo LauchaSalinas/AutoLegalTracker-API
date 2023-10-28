@@ -1,7 +1,8 @@
-﻿using AutoLegalTracker_API.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using LegalTracker.DataAccess.Persistence;
+using LegalTracker.Domain.Entities;
 
-namespace AutoLegalTracker_API.DataAccess;
+namespace LegalTracker.DataAccess;
 
 public class UserDataAccess
 {

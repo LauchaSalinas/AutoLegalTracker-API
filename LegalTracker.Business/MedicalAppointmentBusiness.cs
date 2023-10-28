@@ -1,21 +1,19 @@
 ﻿using Google.Apis.Calendar.v3.Data;
+using LegalTracker.DataAccess.Repositories;
+using LegalTracker.Domain.Entities;
+using GoogleAPI;
 
-using AutoLegalTracker_API.Models;
-using AutoLegalTracker_API.WebServices;
-using AutoLegalTracker_API.DataAccess;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class MedicalAppointmentBusiness
     {
         #region Constructor
-        private readonly IConfiguration _configuration;
         private readonly IDataAccesssAsync<MedicalAppointment> _medicalAppointmentAccess;
         private readonly GoogleCalendarService _googleCalendarService;
 
-        public MedicalAppointmentBusiness(IConfiguration configuration, JwtBusiness jwtBusiness, IDataAccesssAsync<MedicalAppointment> medicalAppointmentAccess, GoogleCalendarService googleCalendarService)
+        public MedicalAppointmentBusiness(JwtBusiness jwtBusiness, IDataAccesssAsync<MedicalAppointment> medicalAppointmentAccess, GoogleCalendarService googleCalendarService)
         {
-            _configuration = configuration;
             _medicalAppointmentAccess = medicalAppointmentAccess;
             _googleCalendarService = googleCalendarService;
 
@@ -27,7 +25,7 @@ namespace AutoLegalTracker_API.Business
         public async Task<FreeBusyResponse> GetFreeBusy(User user, string calendarId, DateTime startDate, DateTime endDate)
         {
             // get freebusy from calendar service
-            var freeBusy = await _googleCalendarService.Set(user).GetFreeBusy(calendarId, startDate, endDate);
+            var freeBusy = await _googleCalendarService.Set(user.ToGoogleAPI()).GetFreeBusy(calendarId, startDate, endDate);
 
             // return freebusy
             return freeBusy;
@@ -37,7 +35,7 @@ namespace AutoLegalTracker_API.Business
         public async Task<List<Event>> GetEvents(User user, string calendarId, DateTime startDate, DateTime endDate)
         {
             // get events from calendar service
-            var events = await _googleCalendarService.Set(user).GetCalendarEvents(calendarId, startDate, endDate);
+            var events = await _googleCalendarService.Set(user.ToGoogleAPI()).GetCalendarEvents(calendarId, startDate, endDate);
 
             // return events
             return events;

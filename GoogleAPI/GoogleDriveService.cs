@@ -1,23 +1,19 @@
 ﻿using Google.Apis.Drive.v3;
 
-using LegalTracker.Domain.Entities;
-
 namespace GoogleAPI
 {
     public class GoogleDriveService
     {
         #region Constructor
-        private readonly IConfiguration _configuration;
         private DriveService? _driveService;
         private readonly GoogleOAuth2Service _googleOAuth2Service;
 
-        public GoogleDriveService(IConfiguration configuration, GoogleOAuth2Service googleOAuth2Service)
+        public GoogleDriveService(GoogleOAuth2Service googleOAuth2Service)
         {
-            _configuration = configuration;
             _googleOAuth2Service = googleOAuth2Service;
         }
 
-        public GoogleDriveService Set(User user)
+        public GoogleDriveService Set(GoogleAPIUserDTO user)
         {
             _driveService = _googleOAuth2Service.Set(user).GetDriveService();
             return this;

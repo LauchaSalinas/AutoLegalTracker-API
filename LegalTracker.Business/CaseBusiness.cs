@@ -1,8 +1,10 @@
-﻿using AutoLegalTracker_API.DataAccess;
+﻿using LegalTracker.DataAccess.Repositories;
+using LegalTracker.DataAccess.Repositories.Impl;
 
-using AutoLegalTracker_API.Models;
+using LegalTracker.Domain.Entities;
+using Microsoft.Extensions.Configuration;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class CaseBusiness
     {

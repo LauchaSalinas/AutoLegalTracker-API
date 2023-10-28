@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>AutoLegalTracker_API</RootNamespace>
+    <RootNamespace>LegalTracker</RootNamespace>
     <UserSecretsId>b415d65b-6e5a-4678-90fb-5b6467acecf4</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>

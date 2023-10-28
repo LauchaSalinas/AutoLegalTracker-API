@@ -1,6 +1,5 @@
 ﻿using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Calendar.v3;
-using LegalTracker.Domain.Entities;
 
 namespace GoogleAPI
 {
@@ -15,7 +14,7 @@ namespace GoogleAPI
             _googleOAuth2Service = googleOAuth2Service;
         }
 
-        public GoogleCalendarService Set(User user)
+        public GoogleCalendarService Set(GoogleAPIUserDTO user)
         {
             _calendarService = _googleOAuth2Service.Set(user).GetCalendarService();
             return this;

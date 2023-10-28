@@ -1,10 +1,10 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.Extensions.Configuration;
+using LegalTracker.DataAccess.Repositories;
+using LegalTracker.Domain.Entities;
+using GoogleAPI;
+using System.Security.Claims;
 
-using AutoLegalTracker_API.WebServices;
-using AutoLegalTracker_API.DataAccess;
-using AutoLegalTracker_API.Models;
-
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class UserBusiness
 	{
@@ -99,8 +99,10 @@ namespace AutoLegalTracker_API.Business
 
         public async Task<User> GetUserFromCookie(ClaimsPrincipal claimsPrincipal)
         {
-            var userSub = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await GetUserFromSub(userSub);
+            var userSub = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier);
+            if(userSub == null)
+                throw new ApplicationException("User not found");
+            var user = await GetUserFromSub(userSub.Value);
             return user;
         }
         private async Task<User> GetUserFromSub(string userSub)

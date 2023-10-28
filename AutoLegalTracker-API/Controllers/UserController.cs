@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Newtonsoft.Json;
 
-using AutoLegalTracker_API.Business;
-using AutoLegalTracker_API.Models;
+using LegalTracker.Business;
+using LegalTracker.Domain.Entities;
 
 namespace ALTDeployTest.Controllers
 {

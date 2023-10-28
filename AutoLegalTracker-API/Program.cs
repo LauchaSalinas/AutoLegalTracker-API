@@ -1,3 +1,4 @@
+using EmailSender;
 using LegalTracker.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -15,7 +16,7 @@ namespace LegalTracker.API
                 //.AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 
-           builder.Services.AddApplication(builder.Environment);
+            builder.Services.AddApplication(builder.Environment);
             
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

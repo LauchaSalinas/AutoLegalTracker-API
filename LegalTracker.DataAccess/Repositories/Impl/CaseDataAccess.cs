@@ -1,7 +1,8 @@
-﻿using AutoLegalTracker_API.Models;
+﻿using LegalTracker.Domain.Entities;
+using LegalTracker.DataAccess.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoLegalTracker_API.DataAccess
+namespace LegalTracker.DataAccess.Repositories.Impl
 {
     public class LegalCaseDataAccessAsync
     {

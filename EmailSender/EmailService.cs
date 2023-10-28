@@ -15,23 +15,21 @@ namespace EmailSender
         private readonly SmtpDeliveryMethod _deliveryMethod = SmtpDeliveryMethod.Network;
         private SmtpClient _smtpClient;
         private readonly string _passwordApp;
-        private readonly IConfiguration _configuration;
+        private readonly SmtpSettings _smptSettings;
 
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(SmtpSettings smptSettings)
         {
             // Recibiendo la inyeccion de dependencia
-            _configuration = configuration;
+            _smptSettings = smptSettings;
             // Indicando la dependencia a asignar
-            _passwordApp = _configuration["EMAIL_SERVICE_PASSWORD"];
-            _userFrom = _configuration["EMAIL_SERVICE_USERFROM"];
             createSmptClient();
         }
 
         #endregion Constructor
 
         #region Public Methods
-        public bool sendEmail(EmailTemplate emailTemplate, string userTo)
+        public bool sendEmail(EmailTemplateDTO emailTemplate, string userTo)
         {
             try
             {

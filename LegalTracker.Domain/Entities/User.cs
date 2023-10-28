@@ -26,7 +26,6 @@
 
         public int LastScrappedPage { get; set; } = 1;
         public DateTime? LastScrappedAt { get; set; }
-
     }
 
     public class UserType

@@ -1,8 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using AutoLegalTracker_API.DataAccess;
-using Google.Apis.Drive.v3.Data;
 using LegalTracker.Application.Services;
+using LegalTracker.Domain.DTOs;
 using LegalTracker.Domain.Entities;
 
 namespace LegalTracker.Scrapper.ExternalServices
@@ -23,175 +22,20 @@ namespace LegalTracker.Scrapper.ExternalServices
         }
         #endregion Constructor
 
-        #region Public Methods
-        // public async Task CheckNewCases()
-        // {
-        //     // TODO: reduce the text in the methods
-        //     #region Variables
-        //     var timeout = int.Parse(_configuration["timeout"]);
-
-        //     #endregion Variables
-        //     try{
-        //         await _puppeteerService.InicializeService();
-
-        //         var controlador = await _puppeteerService.LogIn(_configuration["urlDeLaPaginaLocalhost"], _configuration["selectorInputUsuario"], _configuration["selectorInputContraseña"], _configuration["contenidoInputUsuario"], _configuration["contenidoInputContraseña"], _configuration["selectorBotonIngresar"]);
-        //         await _puppeteerService.Wait(timeout);
-        //         controlador = await _puppeteerService.GoToUrl(await _puppeteerService.GetPropertyWithSelector(_configuration["selectorMisCausas"], _configuration["propiedadHipervinculo"], int.Parse(_configuration["posicionMisCausas"])));
-        //         await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
-        //         await _puppeteerService.ClickSelector(_configuration["selectorBotonMostrarTodasLasCausas"], _configuration["selectorObjetoConfirmacion"]);
-        //         await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
-        //         var result = await _puppeteerService.GetStringArray(_configuration["funcionParaStringArrayObtenerHrefCasos"]);
-        //         await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
-        //         foreach(var causa in LlenarListaDeCausas(result))
-        //             {
-        //                 await _puppeteerService.GoToUrl(causa.ScrapUrl);
-        //                 await CargarCausa(causa);
-        //                 await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
-        //                 var r = await _puppeteerService.GetStringArray(_configuration["funcionParaStringArrayObtenerHrefItramites"]);
-        //                 foreach (var a in r)
-        //                 {
-        //                     AgregarTramiteALista(causa, a);
-        //                 }
-
-        //                 foreach(var legalNotification in causa.LegalNotifications)
-        //                 {
-        //                     await _puppeteerService.GoToUrl(legalNotification.ScrapUrl);
-        //                     await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
-        //                     await CargarTramite(legalNotification);
-        //                     Console.ReadLine();
-        //                 }
-
-        //             }
-        //     }
-        //     catch(Exception e){
-        //         Console.WriteLine(e.Message);
-        //     }
-        // }
-
-        public async Task CargarCausa(LegalCase causa)
+        /// <summary>
+        /// Get last scrap page and last scrapped case. if null, set to 1
+        /// uses builtin web js function buscar [scrapage] and iterates through all pages until 
+        /// scrapper detects that the first case of the page is the same as the first case of the previous page
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>the user with the filled cases</returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<UserToScrapNewLegalCasesDTO> ScrapUserGetAllCases(UserToScrapNewLegalCasesDTO user)
         {
-            causa.CaseNumber = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorNumeroCausa"], _configuration["propiedadTexto"]);
-            causa.Caption = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorCaratula"], _configuration["propiedadTexto"]);
-            causa.Jurisdiction = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorOrganismo"], _configuration["propiedadTexto"]);
-        }
+            if (user == null || user.LastScrappedLegalCase == null)
+                throw new Exception("User is null");
 
-        public void AgregarTramiteALista(LegalCase causa, string a)
-        {
-            switch (a.ToString())
-            {
-                case string s when s.Contains("Presentacion"):
-                    LegalNotification pres = new()
-                    {
-                        NotificationType = "Presentacion",
-                        ScrapUrl = s
-                    };
-                    causa.LegalNotifications.Add(pres);
-                    break;
-
-                case string s when s.Contains("Notificacion"):
-                    LegalNotification noti = new()
-                    {
-                        NotificationType = "Notificacion",
-                        ScrapUrl = s
-                    };
-                    causa.LegalNotifications.Add(noti);
-                    break;
-
-                case string s when s.Contains("Tramite"):
-                    LegalNotification tra = new()
-                    {
-                        NotificationType = "Tramite",
-                        ScrapUrl = s
-                    };
-                    causa.LegalNotifications.Add(tra);
-                    break;
-
-                default: break;
-            }
-            return;
-        }
-
-        public async Task CargarTramite(LegalNotification i)
-        {
-            switch (i.NotificationType)
-            {
-                case "Notificacion":
-
-                    i.Observation = await _puppeteerService.GetPropertyWithSelector(
-                        _configuration["selectorTipoNotificacion"], _configuration["propiedadTexto"]);
-                    i.Title = i.Observation;
-
-                    i.Body = await _puppeteerService.GetPropertyWithSelector(
-                        _configuration["selectorTextoNotificacion"], _configuration["propiedadTexto"], int.Parse(_configuration["posicionTextoNotificacionYPresentacion"]));
-
-                    Console.WriteLine("Este tramite es notificacion de tipo {0}." +
-                        "\nSu texto es: {1}", i.Observation, i.Body);
-                    break;
-
-                case "Presentacion":
-
-                    i.Title = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorTituloPresentacion"], _configuration["propiedadTexto"]);
-                    // TODO store the subtype of the presentation but not in the Observation property
-                    i.Observation = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorTipoPresentacion"], _configuration["propiedadTexto"]);
-
-                    i.Body = await _puppeteerService.GetPropertyWithSelector(
-                        _configuration["selectorTextoPresentacion"], _configuration["propiedadTexto"], int.Parse(_configuration["posicionTextoNotificacionYPresentacion"]));
-
-                    Console.WriteLine("Este tramite es presentacion de tipo {0}, con titulo {1}" +
-                        "\nTexto: {2}",
-                        i.Observation, i.Title, i.Body);
-                    break;
-
-                case "Tramite":
-
-                    i.Body = await _puppeteerService.GetPropertyWithSelector(_configuration["selectorTextoTramite"], _configuration["propiedadTexto"], int.Parse(_configuration["posicionTextoTramite"]));
-
-                    Console.WriteLine("Este es un tramite." +
-                        "\nTexto: {0}", i.Body);
-                    break;
-            }
-        }
-
-        public List<LegalCase> LlenarListaDeCausas(string[] result)
-        {
-            List<LegalCase> causas = new();
-            foreach (var item in result)
-            {
-                LegalCase causa = new()
-                {
-                    ScrapUrl = item
-                };
-                causas.Add(causa);
-            }
-            return causas;
-        }
-
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        public void LoadConfiguration()
-        {
-            if (_configuration == null)
-                throw new Exception("Configuration is null");
-
-
-        }
-
-        public async Task<(List<LegalCase>, int)> ScrapUserGetNewCases(User user, string caseNumber, int lastScrappedPage)
-        {
-            // get all users with the role "Admin", scrap url and login password and last scrap date from the database
-            // foreach user in users 
-            // login
-            // short wait
-
-
-            // get last scrap page and last scrap case. if null, set to 1
-            // buscar [scrapage] and long wait until no results
-            // add new cases to the database, save last scrap page and last scrap case
-
-            _puppeteerService.GoToUrl("https://notificaciones.scba.gov.ar/InterfazBootstrap/vercausas.aspx");
+            await _puppeteerService.GoToUrl("https://notificaciones.scba.gov.ar/InterfazBootstrap/vercausas.aspx");
             await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
 
             var legalCases = new List<LegalCase>();
@@ -199,7 +43,7 @@ namespace LegalTracker.Scrapper.ExternalServices
             var firstCaseOfPage = new LegalCase { CaseNumber = "0" };
             while (!stopScraping)
             {
-                await _puppeteerService.ExecuteJs("buscar", lastScrappedPage.ToString());
+                await _puppeteerService.ExecuteJs("buscar", user.LastScrappedLegalCase.ToString());
                 await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
                 var hrefDeCasos = await _puppeteerService.GetStringArray(_configuration["funcionParaStringArrayObtenerHrefCasos"]);
                 var numerosDeCasos = await _puppeteerService.GetStringArray(_configuration["funcionParaStringArrayObtenerNumeroDeCausas"]);
@@ -223,7 +67,7 @@ namespace LegalTracker.Scrapper.ExternalServices
                     if (i == 0 && firstCaseOfPage.CaseNumber == legalCase.CaseNumber)
                     {
                         stopScraping = true;
-                        lastScrappedPage -= 2;
+                        user.LastScrappedPage -= 2;
                         break;
                     }
                     else
@@ -233,13 +77,13 @@ namespace LegalTracker.Scrapper.ExternalServices
 
                     // if we reached the last scrapped case from previous scrap, 
                     // we reset the list to start scrapping again from the new cases.
-                    if (caseNumber == legalCase.CaseNumber)
+                    if (user.LastScrappedLegalCase.CaseNumber == legalCase.CaseNumber)
                     {
                         legalCases.Clear();
                     }
                 }
 
-                lastScrappedPage++;
+                user.LastScrappedPage++;
                 firstCaseOfPage = new LegalCase()
                 {
                     UserId = user.Id,
@@ -251,10 +95,11 @@ namespace LegalTracker.Scrapper.ExternalServices
                     LastScrappedAt = DateTime.Now
                 };
             }
-            return (legalCases, lastScrappedPage);
+            user.ScrappedLegalCases.AddRange(legalCases);
+            return user;
         }
 
-        public async Task<IEnumerable<LegalNotification>> ScrapCaseGetNewNotifications(LegalCase legalCase, LegalNotification? lastScrappedNotification)
+        public async Task<ICollection<LegalNotification>> ScrapCaseGetNewNotifications(LegalCaseToScrapNotificationsDTO legalCase)
         {
             // get all users
             // foreach user in users
@@ -278,7 +123,7 @@ namespace LegalTracker.Scrapper.ExternalServices
 
 
 
-            await _puppeteerService.GetStringArray(@"() => {document.querySelector('#tabla_length > label > select > option:nth-child(2)').value=1000; return true;}");
+            await _puppeteerService.GetStringArray(@"() => {document.querySelector('#tabla_length > label > select > option:nth-child(2)').value=10000; return true;}");
             await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) / 10);
             await _puppeteerService.GetStringArray(@"() => {document.querySelector('#tabla_length > label > select').selectedIndex = 1; return true;}");
             await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) / 10);
@@ -306,7 +151,7 @@ namespace LegalTracker.Scrapper.ExternalServices
                 };
 
                 legalNotifications.Add(legalNotification);
-                if (lastScrappedNotification != null && hrefLegalNotification[i] == lastScrappedNotification.ScrapUrl)
+                if (legalCase.LastScrappedNotification != null && hrefLegalNotification[i] == legalCase.LastScrappedNotification.ScrapUrl)
                     legalNotifications.Clear();
             }
 
@@ -317,7 +162,7 @@ namespace LegalTracker.Scrapper.ExternalServices
             // save new notifications to the database
         }
 
-        public async Task<IEnumerable<LegalNotification>> ScrapNotificationsUpdateContent(IEnumerable<LegalNotification> legalNotificationsToFill)
+        public async Task<LegalNotificationToFillDTO> ScrapNotificationUpdateContent(LegalNotificationToFillDTO legalNotificationToFill)
         {
             // get all users
             // foreach user in users
@@ -330,64 +175,60 @@ namespace LegalTracker.Scrapper.ExternalServices
             // scrap notification text
             // update notification to the database
 
-            foreach (var legalNotification in legalNotificationsToFill)
+            await _puppeteerService.GoToUrl(legalNotificationToFill.ScrapUrl);
+            await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
+
+            var isValidNotification = bool.Parse(await _puppeteerService.GetString("() => {const elements = document.querySelectorAll('*'); const filteredElements = Array.from(elements).filter((element) => element.innerText.trim() === 'Texto no disponible'); return filteredElements.length == 0;}"));
+
+            if (isValidNotification)
             {
-                await _puppeteerService.GoToUrl(legalNotification.ScrapUrl);
-                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]));
-
-                var isValidNotification = bool.Parse(await _puppeteerService.GetString("() => {const elements = document.querySelectorAll('*'); const filteredElements = Array.from(elements).filter((element) => element.innerText.trim() === 'Texto no disponible'); return filteredElements.length == 0;}"));
-
-                if (isValidNotification)
+                string table = string.Empty;
+                switch (legalNotificationToFill.NotificationType)
                 {
-                    string table = string.Empty;
-                    switch (legalNotification.NotificationType)
-                    {
-                        case "Tramite":
-                            table = "#listaTramites > table";
-                            legalNotification.Body = await _puppeteerService.GetPropertyWithSelector("#listaNovedades > table:nth-child(4) > tbody > tr:nth-child(2)", "innerHTML");
-                            // legalNotification.From = await _puppeteerService.GetPropertyWithSelector("#listaTramites > table > tbody > tr:nth-child(6) > td:nth-child(2) > p", "innerText");
-                            // legalNotification.NotificationDate = DateTime.Parse(await _puppeteerService.GetPropertyWithSelector("#listaTramites > table > tbody > tr:nth-child(8) > td:nth-child(2) > p", "innerText"), new CultureInfo("es-AR"));;                      
-                            // legalNotification.Observation = await _puppeteerService.GetPropertyWithSelector("#listaTramites > table > tbody > tr:nth-child(2) > td:nth-child(2)", "innerText");
-                            break;
-                        case "Presentacion":
-                            table = "#textoPresentacion > table:nth-child(3)";
-                            legalNotification.Body = await _puppeteerService.GetPropertyWithSelector("#hdTexto", "value");
-                            // legalNotification.From = await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblUsuarioGenerador", "innerText");
-                            // legalNotification.NotificationDate = DateTime.Parse(await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblFechaPresentacion", "innerText"), new CultureInfo("es-AR"));
-                            break;
-                        case "Notificacion":
-                            table = "#textoNotificacion > table:nth-child(1)";
-                            // remove hidden text
-                            await _puppeteerService.GetStringArray("() => {document.querySelector('#ctl00_cph_ucTextoNotificacion_hdTextoOculto').remove(); return true;}");
-                            legalNotification.Body = await _puppeteerService.GetPropertyWithSelector("#textoNotificacion > table:nth-child(2) > tbody > tr:nth-child(2)", "innerHTML");
-                            // legalNotification.NotificationDate = DateTime.Parse(await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_ucTextoNotificacion_lblFechaAlta", "innerText"), new CultureInfo("es-AR"));
-                            // legalNotification.From = await _puppeteerService.GetString("() => {var e = document.querySelector('#textoNotificacion > table:nth-child(1) > tbody > tr:nth-child(11) > td:nth-child(2) > p'); var returnString = e.innerText; if (e.innerText.indexOf('Certificado')){ returnString = e.innerText.substring(0, e.innerText.indexOf('Certificado')).trim(); }; if (e.innerText.indexOf('---')){ returnString = e.innerText.substring(0, e.innerText.indexOf('---')).trim(); }; return returnString;}");
-                            break;
-                    }
-
-                    var functionToGetReferences = await _puppeteerService.GetStringArray("() => { const keyValues = []; const table = document.querySelector('" + table + "'); if (!table) { return keyValues; } const rows = table.querySelectorAll('tr'); for (let i = 1; i < rows.length; i++) { const row = rows[i]; const cells = row.querySelectorAll('td'); if (cells.length >= 2) {const key = cells[0].textContent.trim(); const value = cells[1].textContent.trim(); if(key != ''){ keyValues.push(key); keyValues.push(value);}}} return keyValues; }");
-                    var references = new List<NotificationReference>();
-                    for (int i = 0; i < functionToGetReferences.Count; i += 2)
-                    {
-                        references.Add(new NotificationReference()
-                        {
-                            Key = functionToGetReferences[i],
-                            Value = functionToGetReferences[i + 1],
-                            LegalNotificationId = legalNotification.Id
-                        });
-                    }
-                    legalNotification.NotificationReferences = references;
-                }
-                else
-                {
-                    legalNotification.Body = "Texto no disponible";
-                    //legalNotification.LastScrappedAt = DateTime.Now;
-                    // log error
+                    case "Tramite":
+                        table = "#listaTramites > table";
+                        legalNotificationToFill.Body = await _puppeteerService.GetPropertyWithSelector("#listaNovedades > table:nth-child(4) > tbody > tr:nth-child(2)", "innerHTML");
+                        // legalNotification.From = await _puppeteerService.GetPropertyWithSelector("#listaTramites > table > tbody > tr:nth-child(6) > td:nth-child(2) > p", "innerText");
+                        // legalNotification.NotificationDate = DateTime.Parse(await _puppeteerService.GetPropertyWithSelector("#listaTramites > table > tbody > tr:nth-child(8) > td:nth-child(2) > p", "innerText"), new CultureInfo("es-AR"));;                      
+                        // legalNotification.Observation = await _puppeteerService.GetPropertyWithSelector("#listaTramites > table > tbody > tr:nth-child(2) > td:nth-child(2)", "innerText");
+                        break;
+                    case "Presentacion":
+                        table = "#textoPresentacion > table:nth-child(3)";
+                        legalNotificationToFill.Body = await _puppeteerService.GetPropertyWithSelector("#hdTexto", "value");
+                        // legalNotification.From = await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblUsuarioGenerador", "innerText");
+                        // legalNotification.NotificationDate = DateTime.Parse(await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_lblFechaPresentacion", "innerText"), new CultureInfo("es-AR"));
+                        break;
+                    case "Notificacion":
+                        table = "#textoNotificacion > table:nth-child(1)";
+                        // remove hidden text
+                        await _puppeteerService.GetStringArray("() => {document.querySelector('#ctl00_cph_ucTextoNotificacion_hdTextoOculto').remove(); return true;}");
+                        legalNotificationToFill.Body = await _puppeteerService.GetPropertyWithSelector("#textoNotificacion > table:nth-child(2) > tbody > tr:nth-child(2)", "innerHTML");
+                        // legalNotification.NotificationDate = DateTime.Parse(await _puppeteerService.GetPropertyWithSelector("#ctl00_cph_ucTextoNotificacion_lblFechaAlta", "innerText"), new CultureInfo("es-AR"));
+                        // legalNotification.From = await _puppeteerService.GetString("() => {var e = document.querySelector('#textoNotificacion > table:nth-child(1) > tbody > tr:nth-child(11) > td:nth-child(2) > p'); var returnString = e.innerText; if (e.innerText.indexOf('Certificado')){ returnString = e.innerText.substring(0, e.innerText.indexOf('Certificado')).trim(); }; if (e.innerText.indexOf('---')){ returnString = e.innerText.substring(0, e.innerText.indexOf('---')).trim(); }; return returnString;}");
+                        break;
                 }
 
+                var functionToGetReferences = await _puppeteerService.GetStringArray("() => { const keyValues = []; const table = document.querySelector('" + table + "'); if (!table) { return keyValues; } const rows = table.querySelectorAll('tr'); for (let i = 1; i < rows.length; i++) { const row = rows[i]; const cells = row.querySelectorAll('td'); if (cells.length >= 2) {const key = cells[0].textContent.trim(); const value = cells[1].textContent.trim(); if(key != ''){ keyValues.push(key); keyValues.push(value);}}} return keyValues; }");
+                var references = new List<NotificationReference>();
+                for (int i = 0; i < functionToGetReferences.Count; i += 2)
+                {
+                    references.Add(new NotificationReference()
+                    {
+                        Key = functionToGetReferences[i],
+                        Value = functionToGetReferences[i + 1],
+                        LegalNotificationId = legalNotificationToFill.Id
+                    });
+                }
+                legalNotificationToFill.NotificationReferences = references;
+            }
+            else
+            {
+                legalNotificationToFill.Body = "Texto no disponible";
+                //legalNotification.LastScrappedAt = DateTime.Now;
+                // log error
             }
 
-            return legalNotificationsToFill;
+            return legalNotificationToFill;
         }
 
         public async Task LogOut()
@@ -395,7 +236,7 @@ namespace LegalTracker.Scrapper.ExternalServices
             await _puppeteerService.GoToUrl("https://notificaciones.scba.gov.ar/desconectar.aspx");
         }
 
-        internal async Task<IEnumerable<LegalCase>> SaveCasesByNotificationsPage(int userId, int daysFromTodayToScrap)
+        internal async Task<IEnumerable<LegalNotificationByNotificationsPageDTO>> GetNotificationsByNotificationsPage(UserToScrapLastNotificationsDTO user, int daysFromTodayToScrap)
         {
 
             var customCulture = new CultureInfo("es-AR");
@@ -421,259 +262,252 @@ namespace LegalTracker.Scrapper.ExternalServices
             // TODO make this in the other pages
             await _puppeteerService.ExecuteJs("buscar", "1");
             await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) / 6);
-            var totalPages = int.Parse(await _puppeteerService.GetString("() => {return document.querySelector('#cantPag').value;}"));
 
 
-            var legalCases = new List<LegalCase>();
-            LegalCase legalCase;
+            var legalNotifications = new List<LegalNotificationByNotificationsPageDTO>();
+            LegalNotificationByNotificationsPageDTO legalNotification;
             var hrefNotificationStringArray = new List<string>();
-            // todo make this
-            var hrefNotifications = await _puppeteerService.GetStringArray("() => {const elements = []; document.querySelectorAll('.btn.btn-sm.btn-success.boton100.Detalle').forEach(function(element) {elements.push(element.href)}); return elements ; }");
-            var tableTexts = await _puppeteerService.GetStringArray("() => {const tablesTexts = []; const tables = document.querySelectorAll('#notificaciones > div > div > div').forEach(table => { tablesTexts.push(table.innerText)}); return tablesTexts;}");
+            var totalPages = int.Parse(await _puppeteerService.GetString("() => {return document.querySelector('#cantPag').value;}"));
+            if(totalPages == 0)
+                return legalNotifications;
 
-
-            foreach (var tableText in tableTexts)
-            {
-                var jurisdiction = Regex.Match(tableText, @"(?<=Organismo:)(.*?)(?=\n)").Value;
-                var caption = Regex.Match(tableText, @"(?<=Carátula:)(.*?)(?=\n|- Número)").Value.Trim();
-                var caseNumber = Regex.Match(tableText, @"(?<=Número:)(.*?)(?=\n|-)").Value.Trim();
-                var Destinatario = Regex.Match(tableText, @"(?<=Destinatario:)(.*?)(?=\n)").Value;
-                var Domicilio = Regex.Match(tableText, @"(?<=Domicilio:)(.*?)(?=\n)").Value;
-                var Alta = Regex.Match(tableText, @"(?<=Alta o Disponibilidad:)(.*?)(?=\n|- Notifica)").Value.Trim();
-                var Notificacion = Regex.Match(tableText, @"(?<=Notificación:)(.*?)(?=\n)").Value;
-                var Tramite = Regex.Match(tableText, @"(?<=Trámite:)(.*?)(?=\n)").Value;
-                var Codigo = Regex.Match(tableText, @"(?<=Código:)(.*?)(?=\n)").Value;
-                legalCase = new LegalCase()
-                {
-                    UserId = userId,
-                    CaseNumber = caseNumber,
-                    Caption = caption,
-                    Jurisdiction = jurisdiction,
-                    CreatedAt = DateTime.ParseExact(Alta, "d/MM/yyyy HH:mm:ss", customCulture), // "d/MM/yyyy HH:mm:ss"
-                    LastScrappedAt = DateTime.Now
-                };
-                legalCases.Add(legalCase);
-            }
-
-            hrefNotificationStringArray.AddRange(hrefNotifications);
-            for (int i = 1; i < totalPages; i++)
+            // repeat for all pages
+            for (int i = 0; i < totalPages; i++)
             {
                 await _puppeteerService.ExecuteJs("buscar", (i + 1).ToString());
                 await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) / 6);
                 // todo make this
-                hrefNotifications = await _puppeteerService.GetStringArray("() => {const elements = []; document.querySelectorAll('.btn.btn-sm.btn-success.boton100.Detalle').forEach(function(element) {elements.push(element.href)}); return elements ; }");
+                var hrefNotifications = await _puppeteerService.GetStringArray("() => {const elements = []; document.querySelectorAll('.btn.btn-sm.btn-success.boton100.Detalle').forEach(function(element) {elements.push(element.href)}); return elements ; }");
                 hrefNotificationStringArray.AddRange(hrefNotifications);
 
-
-                tableTexts = await _puppeteerService.GetStringArray("() => {const tablesTexts = []; const tables = document.querySelectorAll('#notificaciones > div > div > div').forEach(table => { tablesTexts.push(table.innerText)}); return tablesTexts;}");
+                var tableTexts = await _puppeteerService.GetStringArray("() => {const tablesTexts = []; const tables = document.querySelectorAll('#notificaciones > div > div > div').forEach(table => { tablesTexts.push(table.innerText)}); return tablesTexts;}");
 
 
                 foreach (var tableText in tableTexts)
                 {
                     var jurisdiction = Regex.Match(tableText, @"(?<=Organismo:)(.*?)(?=\r\n)").Value;
-                    var caption = Regex.Match(tableText, @"(?<=Carátula:)(.*?)(?=\r\n|- Número)").Value.Trim();
                     var caseNumber = Regex.Match(tableText, @"(?<=Número:)(.*?)(?=\r\n|-)").Value.Trim();
+                    var caption = Regex.Match(tableText, @"(?<=Carátula:)(.*?)(?=\r\n|- Número)").Value.Trim();
                     var Destinatario = Regex.Match(tableText, @"(?<=Destinatario:)(.*?)(?=\r\n)").Value;
                     var Domicilio = Regex.Match(tableText, @"(?<=Domicilio:)(.*?)(?=\r\n)").Value;
-                    var Alta = Regex.Match(tableText, @"(?<=Alta o Disponibilidad:)(.*?)(?=\r\n|- Notifica)").Value.Trim();
+                    var FechaAlta = Regex.Match(tableText, @"(?<=Alta o Disponibilidad:)(.*?)(?=\r\n|- Notifica)").Value.Trim();
                     var Notificacion = Regex.Match(tableText, @"(?<=Notificación:)(.*?)(?=\r\n)").Value;
                     var Tramite = Regex.Match(tableText, @"(?<=Trámite:)(.*?)(?=\r\n)").Value;
                     var Codigo = Regex.Match(tableText, @"(?<=Código:)(.*?)(?=\r\n)").Value;
-                    legalCase = new LegalCase()
+                    legalNotification = new LegalNotificationByNotificationsPageDTO()
                     {
-                        UserId = 1,
+                        UserId = user.Id,
                         CaseNumber = caseNumber,
-                        Caption = caption,
-                        Jurisdiction = jurisdiction,
-                        CreatedAt = DateTime.ParseExact(Alta, "d/MM/yyyy HH:mm:ss", customCulture), // "d/MM/yyyy HH:mm:ss"
-                        LastScrappedAt = DateTime.Now
+                        CaseCaption = caption,
+                        CaseJurisdiction = jurisdiction,
+                        NotificationCreatedAt = DateTime.ParseExact(FechaAlta, "d/MM/yyyy HH:mm:ss", customCulture), // "d/MM/yyyy HH:mm:ss"
+                        NotificationNotifiedDate = DateTime.ParseExact(Notificacion, "d/MM/yyyy HH:mm:ss", customCulture),
+                        LastScrappedAt = DateTime.MinValue,
+                        NotificationTitle = Tramite
                     };
-                    legalCases.Add(legalCase);
-                }
-
-
-            }
-
-            foreach (var item in hrefNotificationStringArray)
-            {
-                await _puppeteerService.GoToUrl(item, 0);
-                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) / 2);
-                await _puppeteerService.ClickSelector("#lnkVerCausa", "#numeroCausa");
-                await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) * 2);
-
-                var numeroCausa = await _puppeteerService.GetPropertyWithSelector("#numeroCausa", "innerText");
-                var scarpURL = await _puppeteerService.GetString("() => {return window.location.href;}");
-                if (numeroCausa != null)
-                {
-                    var legalcaseToUpdate = legalCases.Find(x => numeroCausa.Contains(x.CaseNumber));
-                    if (legalcaseToUpdate != null)
-                    {
-                        legalCases.Remove(legalcaseToUpdate);
-                        legalcaseToUpdate.ScrapUrl = scarpURL;
-                        legalcaseToUpdate.CaseNumber = numeroCausa;
-                        legalcaseToUpdate = _legalCaseDataAccessAsync.AddOrUpdate(legalcaseToUpdate);
-                        // update the legal case with the one from the db
-                        legalCases.Add(legalcaseToUpdate);
-                    }
+                    legalNotifications.Add(legalNotification);
                 }
             }
-            return legalCases;
+
+            // at the end of this process we have all the scrapUrl of the notifications of that day, with some info about the case.
+            return legalNotifications;
+            
         }
 
-
-
-        #endregion Private Methods
-
-
-
-        public async Task ScrapUsersGetAllCases()
+        public async Task GetLegalCaseFromOrphanNotification(OrphanNotificationDTO orphanNotification)
         {
-            IEnumerable<UserToScrapDTO> usersToScrap = await _scrapperService.GetUsersToScrapAsync();
-            if (!usersToScrap.Any())
+            await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) / 2);
+            await _puppeteerService.GoToUrl(orphanNotification.ScrapUrl);
+            await _puppeteerService.ClickSelector("#lnkVerCausa", "#numeroCausa");
+            await _puppeteerService.Wait(int.Parse(_configuration["timeout"]) * 2);
+
+            var numeroCausa = await _puppeteerService.GetPropertyWithSelector("#numeroCausa", "innerText");
+            var scarpURL = await _puppeteerService.GetString("() => {return window.location.href;}");
+            if (numeroCausa != null)
+            {
+                orphanNotification.ScrappedLegalCase.CaseNumber = numeroCausa;
+                orphanNotification.ScrappedLegalCase.ScrapUrl = scarpURL;
+            }
+        }
+        
+        #region Entry Point Methods
+        /// <summary>
+        /// get all users with the role "Admin", scrap url and login password and last scrap date from the database
+        /// foreach user in users 
+        /// login
+        /// Scrap all cases from "Mis Causas" page
+        /// </summary>
+        /// <returns></returns>
+        public async Task ScrapUserGetAllCases()
+        {
+            UserToScrapNewLegalCasesDTO userToScrap = await _scrapperService.GetUserToScrapAllCases();
+            if (userToScrap == null)
             {
                 Console.WriteLine("No users to scrap");
                 return;
             }
-            foreach (var user in usersToScrap)
+            try
             {
-                try
-                {
-                    await _puppeteerService.LogIn(user.WebCredentialUser, user.WebCredentialPassword);
-                    // Scrap all cases from "Mis Causas" page
-                    // delete tuple and use a DTO (IEnumerable<LegalCase> legalCasesToAdd, var newLastScrappedPage) = await _scrapBusiness.ScrapUserGetNewCases(user, lastScrappedLegalCase.CaseNumber, lastScrappedPage);
-                    await _scrapperService.UpdateUserCases(legalCasesToAdd);
-                    await _userDataAccess.UpdateLastScrappedPage(user, newLastScrappedPage);
-                    await _scrapperService.UpdateScrappedUser();
-                    await _scrapBusiness.LogOut();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error at scrapping user: {user.WebCredentialUser} ex: {ex}");
-                    throw;
-                }
+                await _puppeteerService.LogIn(userToScrap.WebCredentialUser, userToScrap.WebCredentialPassword);
+                // Scrap all cases from "Mis Causas" page
+                var scrappedUser = await ScrapUserGetAllCases(userToScrap);
+                await _scrapperService.UpdateScrappedUserAddLegalCases(scrappedUser);
+                await LogOut();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error at scrapping user: {userToScrap.WebCredentialUser} ex: {ex}");
+                throw;
             }
         }
 
         public async Task ScrapCasesGetAllNotifications()
         {
-            IEnumerable<UserToScrapDTO> usersToScrap = await _scrapperService.GetUsersToScrapAsync();
-            if (!usersToScrap.Any())
+            UsersLegalCasesToScrapNotificationsDTO userToScrap = await _scrapperService.GetUserWithEmptyCasesToScrap();
+            if (userToScrap == null)
             {
                 Console.WriteLine("No users to scrap");
                 return;
             }
-            foreach (var user in usersToScrap)
+
+            try
             {
-                try
+                await _puppeteerService.LogIn(userToScrap.WebCredentialUser, userToScrap.WebCredentialPassword);
+                foreach (var legalCase in userToScrap.LegalCasesToGetNotifications)
                 {
-                    await _puppeteerService.LogIn(user.WebCredentialUser, user.WebCredentialPassword);
-                    IEnumerable<LegalCase> legalCasesToUpdate = await _legalCaseDataAccess.GetCasesToScrap(user.Id);
-                    foreach (var legalCase in legalCasesToUpdate)
+                    try
                     {
-                        var lastNotification = await _legalNotificationDataAccess.GetLastNotification(legalCase.Id);
-                        try
-                        {
-                            var legalNotificationsToAdd = await _scrapBusiness.ScrapCaseGetNewNotifications(legalCase, lastNotification);
-                            await _legalNotificationDataAccess.AddRangeAsync(legalNotificationsToAdd);
-                            // update last scrapped at
-                            legalCase.LastScrappedAt = DateTime.Now;
-                            await _legalCaseDataAccess.UpdateLastScrappedAt(legalCase);
-                            Console.WriteLine($"Caso cargado {legalCase.Id} ");
-
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error de carga caso {legalCase.Id} " + ex.ToString());
-                        }
-
+                        legalCase.ScrappedLegalNotifications = await ScrapCaseGetNewNotifications(legalCase);
+                        await _scrapperService.UpdateLegalCasesAddNotifications(legalCase);
+                        Console.WriteLine($"Legal Case updated {legalCase.Id}");
                     }
-                    await _scrapBusiness.LogOut();
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error at scrapping user: {userToScrap.WebCredentialUser} legal case: {legalCase.Id} " + ex.ToString());
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    throw;
-                }
+                await LogOut();
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
         }
 
         public async Task ScrapNotificationsUpdateContent()
         {
-            IEnumerable<UserToScrapDTO> usersToScrap = await _scrapperService.GetUsersToScrapAsync();
-            if (!usersToScrap.Any())
+            UsersLegalNotificationsToUpdateContentDTO userToScrap = await _scrapperService.GetUserToScrapNotificationContent();
+            if (userToScrap == null)
             {
                 Console.WriteLine("No users to scrap");
                 return;
             }
-            foreach (var user in usersToScrap)
+            
+            try
             {
-                try
+                await _puppeteerService.LogIn(userToScrap.WebCredentialUser, userToScrap.WebCredentialPassword);
+                foreach (var legalNotification in userToScrap.LegalNotificationsToFill)
                 {
-                    await _puppeteerService.LogIn(user.WebCredentialUser, user.WebCredentialPassword);
-                    IEnumerable<LegalCase> legalCasesWithEmptyNotifications = await _legalCaseDataAccess.GetCasesWithEmptyNotifications(user.Id);
-                    foreach (var legalCase in legalCasesWithEmptyNotifications)
+                    try
                     {
-                        var legalNotificationsToFill = await _legalNotificationDataAccess.GetEmptyNotifications(legalCase.Id);
-                        var legalNotificationsToUpdate = await _scrapBusiness.ScrapNotificationsUpdateContent(legalNotificationsToFill);
-                        await _legalNotificationDataAccess.UpdateRangeAsync(legalNotificationsToUpdate);
+                        // TODO Ensure that only fills the notifications of the last 5 days, if less than 200 notifications, fill 200 notifications
+                        var filledLegalNotification = await ScrapNotificationUpdateContent(legalNotification);
+                        await _scrapperService.UpdateFilledLegalNotification(filledLegalNotification);// todo define if its user or legalcase
+                        Console.WriteLine($"Legal notification's {legalNotification.Id} updated");
+
                     }
-                    await _scrapBusiness.LogOut();
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error at scrapping user: {userToScrap.WebCredentialUser} legal notification: {legalNotification.Id} " + ex.ToString());
+                    }
+
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    throw;
-                }
+                await LogOut();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error at scrapping user: {userToScrap.WebCredentialUser}" + ex.ToString());
+                throw;
+            }
+            
         }
 
         public async Task ScrapNotificationsByDay()
         {
-            IEnumerable<UserToScrapDTO> usersToScrap = await _scrapperService.GetUsersToScrapAsync();
-            if (!usersToScrap.Any())
+            UserToScrapLastNotificationsDTO userToScrap = await _scrapperService.GetUserToScrapLastNotifications();
+            if (userToScrap == null)
             {
                 Console.WriteLine("No users to scrap");
                 return;
             }
-
-            foreach (var user in usersToScrap)
+            try
             {
-                try
+                await _puppeteerService.LogIn(userToScrap.WebCredentialUser, userToScrap.WebCredentialPassword);
+                for (int pastDaysToScrap = 1; pastDaysToScrap <= 5; pastDaysToScrap++)
                 {
-                    // TODO add user to the function
-                    // TODO pass date to the function, recursively last 5 days.
-                    for (int pastDaysToScrap = 1; pastDaysToScrap <= 5; pastDaysToScrap++)
+                    try
                     {
-                        var legalCasesFromNotificationPage = await _scrapBusiness.SaveCasesByNotificationsPage(user.Id, pastDaysToScrap);
-
-                        foreach (var legalCase in legalCasesFromNotificationPage)
-                        {
-                            var lastNotification = await _legalNotificationDataAccess.GetLastNotification(legalCase.Id);
-                            try
-                            {
-                                var legalNotificationsToAdd = await _scrapBusiness.ScrapCaseGetNewNotifications(legalCase, lastNotification);
-                                await _legalNotificationDataAccess.AddRangeAsync(legalNotificationsToAdd);
-                                // update last scrapped at
-                                legalCase.LastScrappedAt = DateTime.Now;
-                                await _legalCaseDataAccess.UpdateLastScrappedAt(legalCase);
-                                Console.WriteLine($"Caso cargado {legalCase.Id} ");
-
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Error de carga caso {legalCase.Id} " + ex.ToString());
-                            }
-
-                        }
+                            var legalNotificationsFroNewNotificationPage = await GetNotificationsByNotificationsPage(userToScrap, pastDaysToScrap);
+                            _scrapperService.SaveLegalNotificationsByNotificationsPage(legalNotificationsFroNewNotificationPage);
+                            // entonces la concha puta de mi hermana
+                            // intentar encontrar el caso padre de esta notificacion, si no lo encuentra, crearlo dejando esta notificacion en una tabla de notificaciones sin caso padre
+                            Console.WriteLine($"Notifications from {pastDaysToScrap} days ago saved");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error at scrapping user: {userToScrap.WebCredentialUser} at day {DateTime.Now.AddDays(-pastDaysToScrap)}" + ex.ToString());
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    throw;
-                }
+                await LogOut();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
             }
         }
+
+        public async Task ScrapLegalCasesFromOrphanNotifications()
+        {
+            // get orphan notifications
+            // foreach notification
+            // get case url
+            // check if exists in db, if not, create it LO TIENE QUE DEJAREN EL MISMO ESTADO QUE EL METODO DE ARRIBA PARA QUE LO AGARRE EL METODO DE ARRIBA
+            // it DOESNT scraps the notification content
+
+            UserToScrapOrphanNotificationsDTO userToScrap = await _scrapperService.GetUserToScrapOrphanNotifications();
+            if (userToScrap == null)
+            {
+                Console.WriteLine("No users to scrap");
+                return;
+            }
+            try
+            {
+                await _puppeteerService.LogIn(userToScrap.WebCredentialUser, userToScrap.WebCredentialPassword);
+                foreach (var orphanNotification in userToScrap.OrphanNotifications)
+                {
+                    try
+                    {
+                        await GetLegalCaseFromOrphanNotification(orphanNotification);
+                        _scrapperService.AddOrUpdateLegalCase(orphanNotification);
+                        Console.WriteLine($"Legal case from orphan notification {orphanNotification.ScrapUrl} saved");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error at scrapping user: {userToScrap.WebCredentialUser} orphan notification: {orphanNotification.ScrapUrl}" + ex.ToString());
+                    }
+                }
+                await LogOut();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
+
+        }
+
+        #endregion Entry Point Methods
     }
 }

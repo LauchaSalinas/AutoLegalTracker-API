@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using LegalTracker.Application.Services;
+using EmailSender;
 //using LegalTracker.Application.Services.DevImpl;
 //using LegalTracker.Application.Services.Impl;
 //using LegalTracker.Shared.Services;
@@ -36,8 +36,5 @@ public static class ApplicationDependencyInjection
         //services.AddAutoMapper(typeof(IMappingProfilesMarker));
     }
 
-    public static void AddEmailConfiguration(this IServiceCollection services, IConfiguration configuration)
-    {
-        //services.AddSingleton(configuration.GetSection("SmtpSettings").Get<SmtpSettings>());
-    }
+    
 }

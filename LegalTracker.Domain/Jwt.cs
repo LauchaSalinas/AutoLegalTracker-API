@@ -1,4 +1,4 @@
-﻿namespace AutoLegalTracker_API.Models
+﻿namespace LegalTracker.Models
 {
     public class Jwt
     {

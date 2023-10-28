@@ -19,9 +19,7 @@ namespace LegalTracker.Scrapper.ExternalServices
             
             try
             {
-                await _scrapBusiness.ScrapUsersGetAllCasesAndNotifications();
-
-                
+                await Task.Delay(5000);
             }
             catch (Exception ex)
             {
@@ -29,18 +27,6 @@ namespace LegalTracker.Scrapper.ExternalServices
             }
 
             Console.WriteLine("CheckNewCasesJob finished at: " + DateTime.Now);
-            
-            //// CheckForActionsForNewNotificationsJob
-            //try
-            //{
-            //    await _actionBusiness.RunActionsToNewNotifications();
-            //    Console.WriteLine("CheckForActionsForNewNotifications finished at: " + DateTime.Now);
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex.ToString());
-            //}
-
         }
     }
 }

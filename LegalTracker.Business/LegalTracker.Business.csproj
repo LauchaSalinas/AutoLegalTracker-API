@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LegalTracker.DataAccess\LegalTracker.DataAccess.csproj" />
+    <ProjectReference Include="..\EmailSender\EmailSender.csproj" />
+    <ProjectReference Include="..\GoogleAPI\GoogleAPI.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,9 @@
-﻿using LegalTracker.DataAccess;
+﻿using LegalTracker.DataAccess.Persistence;
 using LegalTracker.Domain.Entities;
+using LegalTracker.DataAccess.Repositories;
+using GoogleAPI;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class CalendarBusiness
     {
@@ -18,10 +20,11 @@ namespace AutoLegalTracker_API.Business
 
         #region Public Methods
         // get calendars of user
+
         public async Task<List<Google.Apis.Calendar.v3.Data.CalendarListEntry>> GetCalendars(User user)
         {
             // get calendars from calendar service
-            var calendars = await _googleCalendarService.Set(user).GetCalendars();
+            var calendars = await _googleCalendarService.Set(user.ToGoogleAPI()).GetCalendars();
 
             // get the string ids of each calendar
             // var calendarIds = calendars.Select(calendar => calendar.Id).ToList();

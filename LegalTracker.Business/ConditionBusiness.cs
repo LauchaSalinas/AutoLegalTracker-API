@@ -1,6 +1,6 @@
-﻿using AutoLegalTracker_API.Models;
+﻿using LegalTracker.Domain.Entities;
 
-namespace AutoLegalTracker_API.Business
+namespace LegalTracker.Business
 {
     public class ConditionBusiness
     {
